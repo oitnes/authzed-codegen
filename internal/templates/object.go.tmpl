@@ -1,0 +1,114 @@
+
+{{- /* gotype: github.com/danhtran94/internal/ast.DefinitionNode */ -}}
+package {{ packageName .ObjectType.Prefix }}
+
+import (
+  "github.com/danhtran94/authzed-codegen/pkg/authz"
+
+  {{ $countRels := len .Relations }}{{ if gt $countRels 0 }}"context"{{ end }}
+)
+{{ $objectType := (print .ObjectType.Prefix "/" .ObjectType.Name) }}{{ $typeName := upperFirst .ObjectType.Name }}
+const Type{{ $typeName }} authz.Type = "{{ $objectType }}"
+type Relation{{ $typeName }} authz.Relation
+type Permission{{ $typeName }} authz.Permission
+
+{{ range $rel := .Relations }}const {{ $typeName }}{{ snakeToPascal $rel.Name }} Relation{{ $typeName }} = "{{ $rel.Name }}"
+type {{ $typeName }}{{ snakeToPascal $rel.Name }}Objects struct {
+{{ range $idx, $relType := relationExpressionTypes $rel.Expression }}  {{ typeName $relType }} []{{ typeName $relType }}
+{{ end }}}
+{{ end }}
+type {{ $typeName }} authz.ID
+{{ $var := .ObjectType.Name }}{{ range $rel := .Relations }}
+func ({{ $var }} {{ $typeName }}) Create{{ snakeToPascal $rel.Name}}Relations(ctx context.Context, objects {{ $typeName }}{{ snakeToPascal $rel.Name }}Objects) error {
+  {{ range $idx, $relType := relationExpressionTypes $rel.Expression }}if len(objects.{{ typeName $relType }}) > 0 {
+    err := authz.GetEngine(ctx).CreateRelations(authz.Resource{
+      Type: Type{{ $typeName }},
+      ID: authz.ID({{ $var }}),
+    }, authz.Relation({{ $typeName }}{{ snakeToPascal $rel.Name }}), Type{{ typeName $relType }}, authz.IDs(objects.{{ typeName $relType }}))
+    if err != nil {
+      return err
+    }
+  }
+  {{ end }}return nil
+}
+{{ end }}{{ $var := .ObjectType.Name }}{{ range $rel := .Relations }}
+func ({{ $var }} {{ $typeName }}) Delete{{ snakeToPascal $rel.Name}}Relations(ctx context.Context, objects {{ $typeName }}{{ snakeToPascal $rel.Name }}Objects) error {
+  {{ range $idx, $relType := relationExpressionTypes $rel.Expression }}if len(objects.{{ typeName $relType }}) > 0 {
+    err := authz.GetEngine(ctx).DeleteRelations(authz.Resource{
+      Type: Type{{ $typeName }},
+      ID: authz.ID({{ $var }}),
+    }, authz.Relation({{ $typeName }}{{ snakeToPascal $rel.Name }}), Type{{ typeName $relType }}, authz.IDs(objects.{{ typeName $relType }}))
+    if err != nil {
+      return err
+    }
+  }
+  {{ end }}return nil
+}
+{{ end }}{{ range $rel := .Relations }}{{ range $idx, $relType := relationExpressionTypes $rel.Expression }}
+func ({{ $var }} {{ $typeName }}) Read{{ snakeToPascal $rel.Name}}{{ typeName $relType }}Relations(ctx context.Context) ([]{{ typeName $relType }}, error) {
+  ids, err := authz.GetEngine(ctx).ReadRelations(authz.Resource{
+    Type: Type{{ $typeName }},
+    ID: authz.ID({{ $var }}),
+  }, authz.Relation({{ $typeName }}{{ snakeToPascal $rel.Name }}), Type{{ typeName $relType }})
+  if err != nil {
+    return nil, err
+  }
+  
+  return authz.FromIDs[{{ typeName $relType }}](ids), nil
+}
+{{ end }}{{ end }}
+{{ range $perm := .Permissions }}const {{ $typeName }}{{ snakeToPascal $perm.Name }} Permission{{ $typeName }} = "{{ $perm.Name }}"
+{{ $inputName := (print "Check" $typeName (snakeToPascal $perm.Name) "Inputs") }}
+type {{ $inputName }} struct {
+{{ range $inputType := permissionInputTypes $objectType $perm.Name }}  {{ typeName $inputType }} []{{ typeName $inputType }}
+{{ end }}}
+
+func ({{ $var }} {{ $typeName }}) Check{{ snakeToPascal $perm.Name }}(ctx context.Context, input {{ $inputName }}) (bool, error) {
+  if {{ range $idx, $inputType := permissionInputTypes $objectType $perm.Name }}len(input.{{ typeName $inputType }}) == 0 && {{ end }}true {
+    return false, authz.ErrNoInput
+  }
+
+  {{ range $inputType := permissionInputTypes $objectType $perm.Name }}if len(input.{{ typeName $inputType }}) > 0 {
+    err := authz.GetEngine(ctx).CheckPermission(authz.Resource{
+      Type: Type{{ $typeName }},
+      ID: authz.ID({{ $var }}),
+    }, authz.Permission({{ $typeName }}{{ snakeToPascal $perm.Name }}), Type{{ typeName $inputType }}, authz.IDs(input.{{ typeName $inputType }}))
+    if err != nil {
+      return false, err
+    }
+  }
+  {{ end }}
+  return true, nil
+}
+
+func Lookup{{ snakeToPascal $perm.Name }}{{ $typeName }}Resources(ctx context.Context, input {{ $inputName }}) ([]{{ $typeName }}, error) {
+  {{ range $inputType := permissionInputTypes $objectType $perm.Name }}if len(input.{{ typeName $inputType }}) > 0 {
+    ids, err := authz.GetEngine(ctx).LookupResources(
+      Type{{ $typeName }}, authz.Permission({{ $typeName }}{{ snakeToPascal $perm.Name }}), 
+      Type{{ typeName $inputType }}, authz.IDs(input.{{ typeName $inputType }}),
+    )
+    if err != nil {
+      return nil, err
+    }
+
+    return authz.FromIDs[{{ $typeName }}](ids), nil
+  }
+  {{ end }}
+  return []{{ $typeName }}{}, nil
+}
+{{ end }}{{ range $perm := .Permissions }}
+{{ range $inputType := permissionInputTypes $objectType $perm.Name }}func ({{ $var }} {{ $typeName }}) Lookup{{ snakeToPascal $perm.Name }}{{ typeName $inputType }}Subjects(ctx context.Context) ([]{{ typeName $inputType }}, error) {
+  ids, err := authz.GetEngine(ctx).LookupSubjects(
+    authz.Resource{
+      Type: Type{{ $typeName }},
+      ID: authz.ID({{ $var }}),
+    }, 
+    authz.Permission({{ $typeName }}{{ snakeToPascal $perm.Name }}), Type{{ typeName $inputType }},
+  )
+  if err != nil {
+    return nil, err
+  }
+
+  return authz.FromIDs[{{ typeName $inputType }}](ids), nil
+}
+{{ end }}{{ end }}

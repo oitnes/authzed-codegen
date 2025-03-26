@@ -1,0 +1,71 @@
+definition bookingsvc/booking {
+	relation owner: bookingsvc/employee
+	relation creator: bookingsvc/employee | bookingsvc/customer
+	permission write = creator + owner + owner->manage + creator->manage
+	permission change_owner = creator + creator->manage
+}
+
+definition bookingsvc/brand {
+	relation admin: bookingsvc/user
+	relation manager: bookingsvc/employee
+	relation employee: bookingsvc/employee
+	permission manage = manager + admin
+	permission create_booking = manage + employee
+}
+
+definition bookingsvc/customer {}
+
+definition bookingsvc/employee {
+	relation account: bookingsvc/user
+	relation belongs_brand: bookingsvc/brand
+	relation viewer: bookingsvc/user:*
+	permission manage = account + belongs_brand->manage
+	permission view = manage + viewer
+}
+
+definition bookingsvc/user {}
+
+definition menusvc/booking {
+	relation owner: menusvc/company
+	relation creator: menusvc/user | menusvc/customer
+	permission write = creator + creator->manage + owner->manage
+}
+
+definition menusvc/user {
+	relation belongs_company: menusvc/company
+	permission manage = belongs_company->manage
+}
+
+definition menusvc/company {
+	relation admin: menusvc/user
+	relation manager: menusvc/user
+	relation employee: menusvc/user
+	permission manage = admin + manager
+	permission create_booking = manage + employee
+	permission create_order = manage + employee
+}
+
+definition menusvc/order {
+	relation creator: menusvc/user | menusvc/customer
+	relation belongs_company: menusvc/company
+	permission write = creator + creator->manage + belongs_company->manage
+}
+
+definition menusvc/table {
+	relation owner: menusvc/company
+	permission write = owner->manage
+}
+
+definition menusvc/customer {}
+
+definition menusvc/pricelist {
+	relation owner: menusvc/company
+	permission write = owner->manage
+}
+
+definition menusvc/product {}
+
+definition menusvc/setting {
+	relation owner: menusvc/company
+	permission write = owner->manage
+}
