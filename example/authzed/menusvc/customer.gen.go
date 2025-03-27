@@ -26,3 +26,8 @@ func CustomerStringers(ids ...authz.StringConvertable) []Customer {
   return result
 }
 
+func (customer Customer) ToList() []Customer {
+  return []Customer{ customer }
+}
+
+

@@ -30,6 +30,10 @@ func UserStringers(ids ...authz.StringConvertable) []User {
   return result
 }
 
+func (user User) ToList() []User {
+  return []User{ user }
+}
+
 func (user User) CreateBelongsCompanyRelations(ctx context.Context, objects UserBelongsCompanyObjects) error {
   if len(objects.Company) > 0 {
     err := authz.GetEngine(ctx).CreateRelations(ctx, authz.Resource{

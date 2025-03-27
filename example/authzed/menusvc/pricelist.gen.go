@@ -30,6 +30,10 @@ func PricelistStringers(ids ...authz.StringConvertable) []Pricelist {
   return result
 }
 
+func (pricelist Pricelist) ToList() []Pricelist {
+  return []Pricelist{ pricelist }
+}
+
 func (pricelist Pricelist) CreateOwnerRelations(ctx context.Context, objects PricelistOwnerObjects) error {
   if len(objects.Company) > 0 {
     err := authz.GetEngine(ctx).CreateRelations(ctx, authz.Resource{

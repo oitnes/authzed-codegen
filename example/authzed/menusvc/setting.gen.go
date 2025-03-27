@@ -30,6 +30,10 @@ func SettingStringers(ids ...authz.StringConvertable) []Setting {
   return result
 }
 
+func (setting Setting) ToList() []Setting {
+  return []Setting{ setting }
+}
+
 func (setting Setting) CreateOwnerRelations(ctx context.Context, objects SettingOwnerObjects) error {
   if len(objects.Company) > 0 {
     err := authz.GetEngine(ctx).CreateRelations(ctx, authz.Resource{

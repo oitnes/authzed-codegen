@@ -35,6 +35,10 @@ func OrderStringers(ids ...authz.StringConvertable) []Order {
   return result
 }
 
+func (order Order) ToList() []Order {
+  return []Order{ order }
+}
+
 func (order Order) CreateCreatorRelations(ctx context.Context, objects OrderCreatorObjects) error {
   if len(objects.User) > 0 {
     err := authz.GetEngine(ctx).CreateRelations(ctx, authz.Resource{
@@ -56,7 +60,6 @@ func (order Order) CreateCreatorRelations(ctx context.Context, objects OrderCrea
   }
   return nil
 }
-
 func (order Order) CreateBelongsCompanyRelations(ctx context.Context, objects OrderBelongsCompanyObjects) error {
   if len(objects.Company) > 0 {
     err := authz.GetEngine(ctx).CreateRelations(ctx, authz.Resource{

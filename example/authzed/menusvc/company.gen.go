@@ -38,6 +38,10 @@ func CompanyStringers(ids ...authz.StringConvertable) []Company {
   return result
 }
 
+func (company Company) ToList() []Company {
+  return []Company{ company }
+}
+
 func (company Company) CreateAdminRelations(ctx context.Context, objects CompanyAdminObjects) error {
   if len(objects.User) > 0 {
     err := authz.GetEngine(ctx).CreateRelations(ctx, authz.Resource{
@@ -50,7 +54,6 @@ func (company Company) CreateAdminRelations(ctx context.Context, objects Company
   }
   return nil
 }
-
 func (company Company) CreateManagerRelations(ctx context.Context, objects CompanyManagerObjects) error {
   if len(objects.User) > 0 {
     err := authz.GetEngine(ctx).CreateRelations(ctx, authz.Resource{
@@ -63,7 +66,6 @@ func (company Company) CreateManagerRelations(ctx context.Context, objects Compa
   }
   return nil
 }
-
 func (company Company) CreateEmployeeRelations(ctx context.Context, objects CompanyEmployeeObjects) error {
   if len(objects.User) > 0 {
     err := authz.GetEngine(ctx).CreateRelations(ctx, authz.Resource{

@@ -30,6 +30,10 @@ func TableStringers(ids ...authz.StringConvertable) []Table {
   return result
 }
 
+func (table Table) ToList() []Table {
+  return []Table{ table }
+}
+
 func (table Table) CreateOwnerRelations(ctx context.Context, objects TableOwnerObjects) error {
   if len(objects.Company) > 0 {
     err := authz.GetEngine(ctx).CreateRelations(ctx, authz.Resource{

@@ -26,3 +26,8 @@ func ProductStringers(ids ...authz.StringConvertable) []Product {
   return result
 }
 
+func (product Product) ToList() []Product {
+  return []Product{ product }
+}
+
+

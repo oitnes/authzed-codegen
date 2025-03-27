@@ -38,6 +38,10 @@ func EmployeeStringers(ids ...authz.StringConvertable) []Employee {
   return result
 }
 
+func (employee Employee) ToList() []Employee {
+  return []Employee{ employee }
+}
+
 func (employee Employee) CreateAccountRelations(ctx context.Context, objects EmployeeAccountObjects) error {
   if len(objects.User) > 0 {
     err := authz.GetEngine(ctx).CreateRelations(ctx, authz.Resource{
@@ -50,7 +54,6 @@ func (employee Employee) CreateAccountRelations(ctx context.Context, objects Emp
   }
   return nil
 }
-
 func (employee Employee) CreateBelongsBrandRelations(ctx context.Context, objects EmployeeBelongsBrandObjects) error {
   if len(objects.Brand) > 0 {
     err := authz.GetEngine(ctx).CreateRelations(ctx, authz.Resource{
@@ -63,7 +66,6 @@ func (employee Employee) CreateBelongsBrandRelations(ctx context.Context, object
   }
   return nil
 }
-
 func (employee Employee) CreateViewerRelations(ctx context.Context, objects EmployeeViewerObjects) error {
   if len(objects.User) > 0 {
     err := authz.GetEngine(ctx).CreateRelations(ctx, authz.Resource{

@@ -38,6 +38,10 @@ func BrandStringers(ids ...authz.StringConvertable) []Brand {
   return result
 }
 
+func (brand Brand) ToList() []Brand {
+  return []Brand{ brand }
+}
+
 func (brand Brand) CreateAdminRelations(ctx context.Context, objects BrandAdminObjects) error {
   if len(objects.User) > 0 {
     err := authz.GetEngine(ctx).CreateRelations(ctx, authz.Resource{
@@ -50,7 +54,6 @@ func (brand Brand) CreateAdminRelations(ctx context.Context, objects BrandAdminO
   }
   return nil
 }
-
 func (brand Brand) CreateManagerRelations(ctx context.Context, objects BrandManagerObjects) error {
   if len(objects.Employee) > 0 {
     err := authz.GetEngine(ctx).CreateRelations(ctx, authz.Resource{
@@ -63,7 +66,6 @@ func (brand Brand) CreateManagerRelations(ctx context.Context, objects BrandMana
   }
   return nil
 }
-
 func (brand Brand) CreateEmployeeRelations(ctx context.Context, objects BrandEmployeeObjects) error {
   if len(objects.Employee) > 0 {
     err := authz.GetEngine(ctx).CreateRelations(ctx, authz.Resource{

@@ -35,6 +35,10 @@ func BookingStringers(ids ...authz.StringConvertable) []Booking {
   return result
 }
 
+func (booking Booking) ToList() []Booking {
+  return []Booking{ booking }
+}
+
 func (booking Booking) CreateOwnerRelations(ctx context.Context, objects BookingOwnerObjects) error {
   if len(objects.Company) > 0 {
     err := authz.GetEngine(ctx).CreateRelations(ctx, authz.Resource{
@@ -47,7 +51,6 @@ func (booking Booking) CreateOwnerRelations(ctx context.Context, objects Booking
   }
   return nil
 }
-
 func (booking Booking) CreateCreatorRelations(ctx context.Context, objects BookingCreatorObjects) error {
   if len(objects.User) > 0 {
     err := authz.GetEngine(ctx).CreateRelations(ctx, authz.Resource{

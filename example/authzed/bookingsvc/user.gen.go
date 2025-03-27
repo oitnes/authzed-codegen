@@ -26,3 +26,8 @@ func UserStringers(ids ...authz.StringConvertable) []User {
   return result
 }
 
+func (user User) ToList() []User {
+  return []User{ user }
+}
+
+

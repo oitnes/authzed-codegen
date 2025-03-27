@@ -29,8 +29,12 @@ func {{ $typeName }}Stringers(ids ...authz.StringConvertable) []{{ $typeName }} 
   }
   return result
 }
-{{ $var := .ObjectType.Name }}{{ range $rel := .Relations }}
-func ({{ $var }} {{ $typeName }}) Create{{ snakeToPascal $rel.Name}}Relations(ctx context.Context, objects {{ $typeName }}{{ snakeToPascal $rel.Name }}Objects) error {
+{{ $var := .ObjectType.Name }}
+func ({{ $var }} {{ $typeName }}) ToList() []{{ $typeName }} {
+  return []{{ $typeName }}{ {{ $var }} }
+}
+
+{{ range $rel := .Relations }}func ({{ $var }} {{ $typeName }}) Create{{ snakeToPascal $rel.Name}}Relations(ctx context.Context, objects {{ $typeName }}{{ snakeToPascal $rel.Name }}Objects) error {
   {{ range $idx, $relType := relationExpressionTypes $rel.Expression }}if len(objects.{{ typeName $relType }}) > 0 {
     err := authz.GetEngine(ctx).CreateRelations(ctx, authz.Resource{
       Type: Type{{ $typeName }},
