@@ -26,6 +26,17 @@ type CompanyEmployeeObjects struct {
 }
 
 type Company authz.ID
+func CompanyStringer(id authz.StringConvertable) Company {
+  return Company(id.String())
+}
+
+func CompanyStringers(ids []authz.StringConvertable) []Company {
+  result := []Company{}
+  for _, id := range ids {
+    result = append(result, Company(id.String()))
+  }
+  return result
+}
 
 func (company Company) CreateAdminRelations(ctx context.Context, objects CompanyAdminObjects) error {
   if len(objects.User) > 0 {

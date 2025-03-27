@@ -26,6 +26,17 @@ type EmployeeViewerObjects struct {
 }
 
 type Employee authz.ID
+func EmployeeStringer(id authz.StringConvertable) Employee {
+  return Employee(id.String())
+}
+
+func EmployeeStringers(ids []authz.StringConvertable) []Employee {
+  result := []Employee{}
+  for _, id := range ids {
+    result = append(result, Employee(id.String()))
+  }
+  return result
+}
 
 func (employee Employee) CreateAccountRelations(ctx context.Context, objects EmployeeAccountObjects) error {
   if len(objects.User) > 0 {

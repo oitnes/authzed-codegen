@@ -26,6 +26,17 @@ type BrandEmployeeObjects struct {
 }
 
 type Brand authz.ID
+func BrandStringer(id authz.StringConvertable) Brand {
+  return Brand(id.String())
+}
+
+func BrandStringers(ids []authz.StringConvertable) []Brand {
+  result := []Brand{}
+  for _, id := range ids {
+    result = append(result, Brand(id.String()))
+  }
+  return result
+}
 
 func (brand Brand) CreateAdminRelations(ctx context.Context, objects BrandAdminObjects) error {
   if len(objects.User) > 0 {

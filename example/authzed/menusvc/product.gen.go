@@ -14,4 +14,15 @@ type PermissionProduct authz.Permission
 
 
 type Product authz.ID
+func ProductStringer(id authz.StringConvertable) Product {
+  return Product(id.String())
+}
+
+func ProductStringers(ids []authz.StringConvertable) []Product {
+  result := []Product{}
+  for _, id := range ids {
+    result = append(result, Product(id.String()))
+  }
+  return result
+}
 

@@ -18,6 +18,17 @@ type SettingOwnerObjects struct {
 }
 
 type Setting authz.ID
+func SettingStringer(id authz.StringConvertable) Setting {
+  return Setting(id.String())
+}
+
+func SettingStringers(ids []authz.StringConvertable) []Setting {
+  result := []Setting{}
+  for _, id := range ids {
+    result = append(result, Setting(id.String()))
+  }
+  return result
+}
 
 func (setting Setting) CreateOwnerRelations(ctx context.Context, objects SettingOwnerObjects) error {
   if len(objects.Company) > 0 {

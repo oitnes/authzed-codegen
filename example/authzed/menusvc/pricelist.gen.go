@@ -18,6 +18,17 @@ type PricelistOwnerObjects struct {
 }
 
 type Pricelist authz.ID
+func PricelistStringer(id authz.StringConvertable) Pricelist {
+  return Pricelist(id.String())
+}
+
+func PricelistStringers(ids []authz.StringConvertable) []Pricelist {
+  result := []Pricelist{}
+  for _, id := range ids {
+    result = append(result, Pricelist(id.String()))
+  }
+  return result
+}
 
 func (pricelist Pricelist) CreateOwnerRelations(ctx context.Context, objects PricelistOwnerObjects) error {
   if len(objects.Company) > 0 {

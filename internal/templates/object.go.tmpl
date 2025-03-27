@@ -18,6 +18,17 @@ type {{ $typeName }}{{ snakeToPascal $rel.Name }}Objects struct {
 {{ end }}}
 {{ end }}
 type {{ $typeName }} authz.ID
+func {{ $typeName }}Stringer(id authz.StringConvertable) {{ $typeName }} {
+  return {{ $typeName }}(id.String())
+}
+
+func {{ $typeName }}Stringers(ids []authz.StringConvertable) []{{ $typeName }} {
+  result := []{{ $typeName }}{}
+  for _, id := range ids {
+    result = append(result, {{ $typeName }}(id.String()))
+  }
+  return result
+}
 {{ $var := .ObjectType.Name }}{{ range $rel := .Relations }}
 func ({{ $var }} {{ $typeName }}) Create{{ snakeToPascal $rel.Name}}Relations(ctx context.Context, objects {{ $typeName }}{{ snakeToPascal $rel.Name }}Objects) error {
   {{ range $idx, $relType := relationExpressionTypes $rel.Expression }}if len(objects.{{ typeName $relType }}) > 0 {

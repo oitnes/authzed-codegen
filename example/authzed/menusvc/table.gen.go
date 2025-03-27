@@ -18,6 +18,17 @@ type TableOwnerObjects struct {
 }
 
 type Table authz.ID
+func TableStringer(id authz.StringConvertable) Table {
+  return Table(id.String())
+}
+
+func TableStringers(ids []authz.StringConvertable) []Table {
+  result := []Table{}
+  for _, id := range ids {
+    result = append(result, Table(id.String()))
+  }
+  return result
+}
 
 func (table Table) CreateOwnerRelations(ctx context.Context, objects TableOwnerObjects) error {
   if len(objects.Company) > 0 {

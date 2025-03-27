@@ -23,6 +23,17 @@ type OrderBelongsCompanyObjects struct {
 }
 
 type Order authz.ID
+func OrderStringer(id authz.StringConvertable) Order {
+  return Order(id.String())
+}
+
+func OrderStringers(ids []authz.StringConvertable) []Order {
+  result := []Order{}
+  for _, id := range ids {
+    result = append(result, Order(id.String()))
+  }
+  return result
+}
 
 func (order Order) CreateCreatorRelations(ctx context.Context, objects OrderCreatorObjects) error {
   if len(objects.User) > 0 {
