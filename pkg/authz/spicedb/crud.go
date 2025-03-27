@@ -42,6 +42,10 @@ func (e *Engine) debugLog(format string, args ...interface{}) {
 	}
 }
 
+func (e *Engine) SetProduction(yes bool) {
+	e.production = yes
+}
+
 func (e *Engine) setToken(token string) {
 	e.debugLog("Setting token: %s", token)
 	e.token = token
