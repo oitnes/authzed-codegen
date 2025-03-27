@@ -64,3 +64,25 @@ func FromIDs[T ~string](ids []ID) []T {
 
 	return result
 }
+
+type StringConvertable interface {
+	String() string
+}
+
+func Stringer[T ~string](id StringConvertable) T {
+	return T(id.String())
+}
+
+func Stringers[T ~string](ids []StringConvertable) []T {
+	result := []T{}
+
+	for _, id := range ids {
+		result = append(result, T(id.String()))
+	}
+
+	return result
+}
+
+func permStrACL(perm Permission, obj Type, objID ID, sub Type, subID ID) string {
+	return fmt.Sprintf("<%s:%s#%s@%s:%s>", obj, objID, string(perm), sub, subID)
+}
