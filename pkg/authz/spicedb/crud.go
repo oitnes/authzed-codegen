@@ -50,7 +50,7 @@ func (e *Engine) setToken(token string) {
 
 func (e *Engine) getConsistencySnapshot() *v1.Consistency {
 	now := time.Now().UnixNano()
-	if now-e.setTokenTime < e.durationExpire.Nanoseconds() {
+	if now-e.setTokenTime > e.durationExpire.Nanoseconds() {
 		e.debugLog("Using default consistency")
 		return nil
 	}
