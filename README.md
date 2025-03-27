@@ -2,14 +2,20 @@
 
 This repository contains Type-Safe Code Generation tools for AuthZed.
 
+[Authzed](https://authzed.com/) is a powerful authorization engine that allows you to define and manage your authorization policies. This code generation tool helps you generate type-safe code for your AuthZed schemas, making it easier to work with your authorization policies in a type-safe manner.
+
 TLDR; `zed` schema => `go` code generation.
 
 ```hcl
+// ... other definitions
+
 definition menusvc/order {
 	relation creator: menusvc/user | menusvc/customer
 	relation company: menusvc/company
 	permission write = creator + creator->manage + company->manage
 }
+
+// ... other definitions
 ```
 
 ```golang
@@ -47,16 +53,17 @@ type PermissionOrder authz.Permission
 // Many payload types like `OrderCreatorObjects`, `OrderCreatorRelation`, etc.
 // ...
 
-const OrderCreator RelationOrder = "creator"
-const OrderBelongsCompany RelationOrder = "belongs_company"
 type Order authz.ID
+
+const OrderCreator RelationOrder = "creator"
+const OrderCompany RelationOrder = "company"
+
+const OrderWrite PermissionOrder = "write"
 
 // Many other utility methods like `Order.CreateCreatorRelations`, `Order.CheckWrite`, etc.
 // ...
 ```
 
-
-[Authzed](https://authzed.com/) is a powerful authorization engine that allows you to define and manage your authorization policies. This code generation tool helps you generate type-safe code for your AuthZed schemas, making it easier to work with your authorization policies in a type-safe manner.
 
 ## Installation
 
