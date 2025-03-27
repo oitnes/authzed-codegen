@@ -30,7 +30,7 @@ func CompanyStringer(id authz.StringConvertable) Company {
   return Company(id.String())
 }
 
-func CompanyStringers(ids []authz.StringConvertable) []Company {
+func CompanyStringers(ids ...authz.StringConvertable) []Company {
   result := []Company{}
   for _, id := range ids {
     result = append(result, Company(id.String()))

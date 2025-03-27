@@ -27,7 +27,7 @@ func BookingStringer(id authz.StringConvertable) Booking {
   return Booking(id.String())
 }
 
-func BookingStringers(ids []authz.StringConvertable) []Booking {
+func BookingStringers(ids ...authz.StringConvertable) []Booking {
   result := []Booking{}
   for _, id := range ids {
     result = append(result, Booking(id.String()))

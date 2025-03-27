@@ -27,7 +27,7 @@ func OrderStringer(id authz.StringConvertable) Order {
   return Order(id.String())
 }
 
-func OrderStringers(ids []authz.StringConvertable) []Order {
+func OrderStringers(ids ...authz.StringConvertable) []Order {
   result := []Order{}
   for _, id := range ids {
     result = append(result, Order(id.String()))

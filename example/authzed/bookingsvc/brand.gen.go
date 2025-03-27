@@ -30,7 +30,7 @@ func BrandStringer(id authz.StringConvertable) Brand {
   return Brand(id.String())
 }
 
-func BrandStringers(ids []authz.StringConvertable) []Brand {
+func BrandStringers(ids ...authz.StringConvertable) []Brand {
   result := []Brand{}
   for _, id := range ids {
     result = append(result, Brand(id.String()))

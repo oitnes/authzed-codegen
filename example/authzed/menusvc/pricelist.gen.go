@@ -22,7 +22,7 @@ func PricelistStringer(id authz.StringConvertable) Pricelist {
   return Pricelist(id.String())
 }
 
-func PricelistStringers(ids []authz.StringConvertable) []Pricelist {
+func PricelistStringers(ids ...authz.StringConvertable) []Pricelist {
   result := []Pricelist{}
   for _, id := range ids {
     result = append(result, Pricelist(id.String()))

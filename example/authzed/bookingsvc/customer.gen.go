@@ -18,7 +18,7 @@ func CustomerStringer(id authz.StringConvertable) Customer {
   return Customer(id.String())
 }
 
-func CustomerStringers(ids []authz.StringConvertable) []Customer {
+func CustomerStringers(ids ...authz.StringConvertable) []Customer {
   result := []Customer{}
   for _, id := range ids {
     result = append(result, Customer(id.String()))

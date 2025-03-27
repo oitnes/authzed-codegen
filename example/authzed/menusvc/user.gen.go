@@ -22,7 +22,7 @@ func UserStringer(id authz.StringConvertable) User {
   return User(id.String())
 }
 
-func UserStringers(ids []authz.StringConvertable) []User {
+func UserStringers(ids ...authz.StringConvertable) []User {
   result := []User{}
   for _, id := range ids {
     result = append(result, User(id.String()))

@@ -22,7 +22,7 @@ func {{ $typeName }}Stringer(id authz.StringConvertable) {{ $typeName }} {
   return {{ $typeName }}(id.String())
 }
 
-func {{ $typeName }}Stringers(ids []authz.StringConvertable) []{{ $typeName }} {
+func {{ $typeName }}Stringers(ids ...authz.StringConvertable) []{{ $typeName }} {
   result := []{{ $typeName }}{}
   for _, id := range ids {
     result = append(result, {{ $typeName }}(id.String()))

@@ -30,7 +30,7 @@ func EmployeeStringer(id authz.StringConvertable) Employee {
   return Employee(id.String())
 }
 
-func EmployeeStringers(ids []authz.StringConvertable) []Employee {
+func EmployeeStringers(ids ...authz.StringConvertable) []Employee {
   result := []Employee{}
   for _, id := range ids {
     result = append(result, Employee(id.String()))

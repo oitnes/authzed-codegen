@@ -22,7 +22,7 @@ func TableStringer(id authz.StringConvertable) Table {
   return Table(id.String())
 }
 
-func TableStringers(ids []authz.StringConvertable) []Table {
+func TableStringers(ids ...authz.StringConvertable) []Table {
   result := []Table{}
   for _, id := range ids {
     result = append(result, Table(id.String()))

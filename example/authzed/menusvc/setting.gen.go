@@ -22,7 +22,7 @@ func SettingStringer(id authz.StringConvertable) Setting {
   return Setting(id.String())
 }
 
-func SettingStringers(ids []authz.StringConvertable) []Setting {
+func SettingStringers(ids ...authz.StringConvertable) []Setting {
   result := []Setting{}
   for _, id := range ids {
     result = append(result, Setting(id.String()))
