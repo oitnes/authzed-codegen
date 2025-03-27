@@ -6,14 +6,15 @@ import (
 )
 
 var ErrNoInput = fmt.Errorf("no input")
+var ErrPermissionDenied = fmt.Errorf("permission denied")
 
 type Engine interface {
-	CreateRelations(to Resource, relation Relation, subject Type, ids []ID) error
-	CheckPermission(dest Resource, has Permission, subject Type, audIDs []ID) error
-	LookupResources(from Type, match Permission, subject Type, byIDs []ID) ([]ID, error)
-	LookupSubjects(on Resource, permission Permission, subject Type) ([]ID, error)
-	ReadRelations(from Resource, relation Relation, subject Type) ([]ID, error)
-	DeleteRelations(from Resource, relation Relation, subject Type, ids []ID) error
+	CreateRelations(ctx context.Context, to Resource, relation Relation, subject Type, ids []ID) error
+	CheckPermission(ctx context.Context, dest Resource, has Permission, subject Type, audIDs []ID) error
+	LookupResources(ctx context.Context, from Type, match Permission, subject Type, byIDs []ID) ([]ID, error)
+	LookupSubjects(ctx context.Context, on Resource, permission Permission, subject Type) ([]ID, error)
+	ReadRelations(ctx context.Context, from Resource, relation Relation, subject Type) ([]ID, error)
+	DeleteRelations(ctx context.Context, from Resource, relation Relation, subject Type, ids []ID) error
 }
 
 var DefaultEngine Engine = nil

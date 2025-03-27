@@ -26,7 +26,7 @@ type Booking authz.ID
 
 func (booking Booking) CreateOwnerRelations(ctx context.Context, objects BookingOwnerObjects) error {
   if len(objects.Employee) > 0 {
-    err := authz.GetEngine(ctx).CreateRelations(authz.Resource{
+    err := authz.GetEngine(ctx).CreateRelations(ctx, authz.Resource{
       Type: TypeBooking,
       ID: authz.ID(booking),
     }, authz.Relation(BookingOwner), TypeEmployee, authz.IDs(objects.Employee))
@@ -39,7 +39,7 @@ func (booking Booking) CreateOwnerRelations(ctx context.Context, objects Booking
 
 func (booking Booking) CreateCreatorRelations(ctx context.Context, objects BookingCreatorObjects) error {
   if len(objects.Employee) > 0 {
-    err := authz.GetEngine(ctx).CreateRelations(authz.Resource{
+    err := authz.GetEngine(ctx).CreateRelations(ctx, authz.Resource{
       Type: TypeBooking,
       ID: authz.ID(booking),
     }, authz.Relation(BookingCreator), TypeEmployee, authz.IDs(objects.Employee))
@@ -48,7 +48,7 @@ func (booking Booking) CreateCreatorRelations(ctx context.Context, objects Booki
     }
   }
   if len(objects.Customer) > 0 {
-    err := authz.GetEngine(ctx).CreateRelations(authz.Resource{
+    err := authz.GetEngine(ctx).CreateRelations(ctx, authz.Resource{
       Type: TypeBooking,
       ID: authz.ID(booking),
     }, authz.Relation(BookingCreator), TypeCustomer, authz.IDs(objects.Customer))
@@ -61,7 +61,7 @@ func (booking Booking) CreateCreatorRelations(ctx context.Context, objects Booki
 
 func (booking Booking) DeleteOwnerRelations(ctx context.Context, objects BookingOwnerObjects) error {
   if len(objects.Employee) > 0 {
-    err := authz.GetEngine(ctx).DeleteRelations(authz.Resource{
+    err := authz.GetEngine(ctx).DeleteRelations(ctx, authz.Resource{
       Type: TypeBooking,
       ID: authz.ID(booking),
     }, authz.Relation(BookingOwner), TypeEmployee, authz.IDs(objects.Employee))
@@ -74,7 +74,7 @@ func (booking Booking) DeleteOwnerRelations(ctx context.Context, objects Booking
 
 func (booking Booking) DeleteCreatorRelations(ctx context.Context, objects BookingCreatorObjects) error {
   if len(objects.Employee) > 0 {
-    err := authz.GetEngine(ctx).DeleteRelations(authz.Resource{
+    err := authz.GetEngine(ctx).DeleteRelations(ctx, authz.Resource{
       Type: TypeBooking,
       ID: authz.ID(booking),
     }, authz.Relation(BookingCreator), TypeEmployee, authz.IDs(objects.Employee))
@@ -83,7 +83,7 @@ func (booking Booking) DeleteCreatorRelations(ctx context.Context, objects Booki
     }
   }
   if len(objects.Customer) > 0 {
-    err := authz.GetEngine(ctx).DeleteRelations(authz.Resource{
+    err := authz.GetEngine(ctx).DeleteRelations(ctx, authz.Resource{
       Type: TypeBooking,
       ID: authz.ID(booking),
     }, authz.Relation(BookingCreator), TypeCustomer, authz.IDs(objects.Customer))
@@ -95,7 +95,7 @@ func (booking Booking) DeleteCreatorRelations(ctx context.Context, objects Booki
 }
 
 func (booking Booking) ReadOwnerEmployeeRelations(ctx context.Context) ([]Employee, error) {
-  ids, err := authz.GetEngine(ctx).ReadRelations(authz.Resource{
+  ids, err := authz.GetEngine(ctx).ReadRelations(ctx, authz.Resource{
     Type: TypeBooking,
     ID: authz.ID(booking),
   }, authz.Relation(BookingOwner), TypeEmployee)
@@ -107,7 +107,7 @@ func (booking Booking) ReadOwnerEmployeeRelations(ctx context.Context) ([]Employ
 }
 
 func (booking Booking) ReadCreatorEmployeeRelations(ctx context.Context) ([]Employee, error) {
-  ids, err := authz.GetEngine(ctx).ReadRelations(authz.Resource{
+  ids, err := authz.GetEngine(ctx).ReadRelations(ctx, authz.Resource{
     Type: TypeBooking,
     ID: authz.ID(booking),
   }, authz.Relation(BookingCreator), TypeEmployee)
@@ -119,7 +119,7 @@ func (booking Booking) ReadCreatorEmployeeRelations(ctx context.Context) ([]Empl
 }
 
 func (booking Booking) ReadCreatorCustomerRelations(ctx context.Context) ([]Customer, error) {
-  ids, err := authz.GetEngine(ctx).ReadRelations(authz.Resource{
+  ids, err := authz.GetEngine(ctx).ReadRelations(ctx, authz.Resource{
     Type: TypeBooking,
     ID: authz.ID(booking),
   }, authz.Relation(BookingCreator), TypeCustomer)
@@ -144,7 +144,7 @@ func (booking Booking) CheckWrite(ctx context.Context, input CheckBookingWriteIn
   }
 
   if len(input.Employee) > 0 {
-    err := authz.GetEngine(ctx).CheckPermission(authz.Resource{
+    err := authz.GetEngine(ctx).CheckPermission(ctx, authz.Resource{
       Type: TypeBooking,
       ID: authz.ID(booking),
     }, authz.Permission(BookingWrite), TypeEmployee, authz.IDs(input.Employee))
@@ -153,7 +153,7 @@ func (booking Booking) CheckWrite(ctx context.Context, input CheckBookingWriteIn
     }
   }
   if len(input.Customer) > 0 {
-    err := authz.GetEngine(ctx).CheckPermission(authz.Resource{
+    err := authz.GetEngine(ctx).CheckPermission(ctx, authz.Resource{
       Type: TypeBooking,
       ID: authz.ID(booking),
     }, authz.Permission(BookingWrite), TypeCustomer, authz.IDs(input.Customer))
@@ -162,7 +162,7 @@ func (booking Booking) CheckWrite(ctx context.Context, input CheckBookingWriteIn
     }
   }
   if len(input.User) > 0 {
-    err := authz.GetEngine(ctx).CheckPermission(authz.Resource{
+    err := authz.GetEngine(ctx).CheckPermission(ctx, authz.Resource{
       Type: TypeBooking,
       ID: authz.ID(booking),
     }, authz.Permission(BookingWrite), TypeUser, authz.IDs(input.User))
@@ -176,7 +176,7 @@ func (booking Booking) CheckWrite(ctx context.Context, input CheckBookingWriteIn
 
 func LookupWriteBookingResources(ctx context.Context, input CheckBookingWriteInputs) ([]Booking, error) {
   if len(input.Employee) > 0 {
-    ids, err := authz.GetEngine(ctx).LookupResources(
+    ids, err := authz.GetEngine(ctx).LookupResources(ctx,
       TypeBooking, authz.Permission(BookingWrite), 
       TypeEmployee, authz.IDs(input.Employee),
     )
@@ -187,7 +187,7 @@ func LookupWriteBookingResources(ctx context.Context, input CheckBookingWriteInp
     return authz.FromIDs[Booking](ids), nil
   }
   if len(input.Customer) > 0 {
-    ids, err := authz.GetEngine(ctx).LookupResources(
+    ids, err := authz.GetEngine(ctx).LookupResources(ctx,
       TypeBooking, authz.Permission(BookingWrite), 
       TypeCustomer, authz.IDs(input.Customer),
     )
@@ -198,7 +198,7 @@ func LookupWriteBookingResources(ctx context.Context, input CheckBookingWriteInp
     return authz.FromIDs[Booking](ids), nil
   }
   if len(input.User) > 0 {
-    ids, err := authz.GetEngine(ctx).LookupResources(
+    ids, err := authz.GetEngine(ctx).LookupResources(ctx,
       TypeBooking, authz.Permission(BookingWrite), 
       TypeUser, authz.IDs(input.User),
     )
@@ -225,7 +225,7 @@ func (booking Booking) CheckChangeOwner(ctx context.Context, input CheckBookingC
   }
 
   if len(input.Employee) > 0 {
-    err := authz.GetEngine(ctx).CheckPermission(authz.Resource{
+    err := authz.GetEngine(ctx).CheckPermission(ctx, authz.Resource{
       Type: TypeBooking,
       ID: authz.ID(booking),
     }, authz.Permission(BookingChangeOwner), TypeEmployee, authz.IDs(input.Employee))
@@ -234,7 +234,7 @@ func (booking Booking) CheckChangeOwner(ctx context.Context, input CheckBookingC
     }
   }
   if len(input.Customer) > 0 {
-    err := authz.GetEngine(ctx).CheckPermission(authz.Resource{
+    err := authz.GetEngine(ctx).CheckPermission(ctx, authz.Resource{
       Type: TypeBooking,
       ID: authz.ID(booking),
     }, authz.Permission(BookingChangeOwner), TypeCustomer, authz.IDs(input.Customer))
@@ -243,7 +243,7 @@ func (booking Booking) CheckChangeOwner(ctx context.Context, input CheckBookingC
     }
   }
   if len(input.User) > 0 {
-    err := authz.GetEngine(ctx).CheckPermission(authz.Resource{
+    err := authz.GetEngine(ctx).CheckPermission(ctx, authz.Resource{
       Type: TypeBooking,
       ID: authz.ID(booking),
     }, authz.Permission(BookingChangeOwner), TypeUser, authz.IDs(input.User))
@@ -257,7 +257,7 @@ func (booking Booking) CheckChangeOwner(ctx context.Context, input CheckBookingC
 
 func LookupChangeOwnerBookingResources(ctx context.Context, input CheckBookingChangeOwnerInputs) ([]Booking, error) {
   if len(input.Employee) > 0 {
-    ids, err := authz.GetEngine(ctx).LookupResources(
+    ids, err := authz.GetEngine(ctx).LookupResources(ctx,
       TypeBooking, authz.Permission(BookingChangeOwner), 
       TypeEmployee, authz.IDs(input.Employee),
     )
@@ -268,7 +268,7 @@ func LookupChangeOwnerBookingResources(ctx context.Context, input CheckBookingCh
     return authz.FromIDs[Booking](ids), nil
   }
   if len(input.Customer) > 0 {
-    ids, err := authz.GetEngine(ctx).LookupResources(
+    ids, err := authz.GetEngine(ctx).LookupResources(ctx,
       TypeBooking, authz.Permission(BookingChangeOwner), 
       TypeCustomer, authz.IDs(input.Customer),
     )
@@ -279,7 +279,7 @@ func LookupChangeOwnerBookingResources(ctx context.Context, input CheckBookingCh
     return authz.FromIDs[Booking](ids), nil
   }
   if len(input.User) > 0 {
-    ids, err := authz.GetEngine(ctx).LookupResources(
+    ids, err := authz.GetEngine(ctx).LookupResources(ctx,
       TypeBooking, authz.Permission(BookingChangeOwner), 
       TypeUser, authz.IDs(input.User),
     )
@@ -294,7 +294,7 @@ func LookupChangeOwnerBookingResources(ctx context.Context, input CheckBookingCh
 }
 
 func (booking Booking) LookupWriteEmployeeSubjects(ctx context.Context) ([]Employee, error) {
-  ids, err := authz.GetEngine(ctx).LookupSubjects(
+  ids, err := authz.GetEngine(ctx).LookupSubjects(ctx,
     authz.Resource{
       Type: TypeBooking,
       ID: authz.ID(booking),
@@ -308,7 +308,7 @@ func (booking Booking) LookupWriteEmployeeSubjects(ctx context.Context) ([]Emplo
   return authz.FromIDs[Employee](ids), nil
 }
 func (booking Booking) LookupWriteCustomerSubjects(ctx context.Context) ([]Customer, error) {
-  ids, err := authz.GetEngine(ctx).LookupSubjects(
+  ids, err := authz.GetEngine(ctx).LookupSubjects(ctx,
     authz.Resource{
       Type: TypeBooking,
       ID: authz.ID(booking),
@@ -322,7 +322,7 @@ func (booking Booking) LookupWriteCustomerSubjects(ctx context.Context) ([]Custo
   return authz.FromIDs[Customer](ids), nil
 }
 func (booking Booking) LookupWriteUserSubjects(ctx context.Context) ([]User, error) {
-  ids, err := authz.GetEngine(ctx).LookupSubjects(
+  ids, err := authz.GetEngine(ctx).LookupSubjects(ctx,
     authz.Resource{
       Type: TypeBooking,
       ID: authz.ID(booking),
@@ -337,7 +337,7 @@ func (booking Booking) LookupWriteUserSubjects(ctx context.Context) ([]User, err
 }
 
 func (booking Booking) LookupChangeOwnerEmployeeSubjects(ctx context.Context) ([]Employee, error) {
-  ids, err := authz.GetEngine(ctx).LookupSubjects(
+  ids, err := authz.GetEngine(ctx).LookupSubjects(ctx,
     authz.Resource{
       Type: TypeBooking,
       ID: authz.ID(booking),
@@ -351,7 +351,7 @@ func (booking Booking) LookupChangeOwnerEmployeeSubjects(ctx context.Context) ([
   return authz.FromIDs[Employee](ids), nil
 }
 func (booking Booking) LookupChangeOwnerCustomerSubjects(ctx context.Context) ([]Customer, error) {
-  ids, err := authz.GetEngine(ctx).LookupSubjects(
+  ids, err := authz.GetEngine(ctx).LookupSubjects(ctx,
     authz.Resource{
       Type: TypeBooking,
       ID: authz.ID(booking),
@@ -365,7 +365,7 @@ func (booking Booking) LookupChangeOwnerCustomerSubjects(ctx context.Context) ([
   return authz.FromIDs[Customer](ids), nil
 }
 func (booking Booking) LookupChangeOwnerUserSubjects(ctx context.Context) ([]User, error) {
-  ids, err := authz.GetEngine(ctx).LookupSubjects(
+  ids, err := authz.GetEngine(ctx).LookupSubjects(ctx,
     authz.Resource{
       Type: TypeBooking,
       ID: authz.ID(booking),

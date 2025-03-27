@@ -21,7 +21,7 @@ type {{ $typeName }} authz.ID
 {{ $var := .ObjectType.Name }}{{ range $rel := .Relations }}
 func ({{ $var }} {{ $typeName }}) Create{{ snakeToPascal $rel.Name}}Relations(ctx context.Context, objects {{ $typeName }}{{ snakeToPascal $rel.Name }}Objects) error {
   {{ range $idx, $relType := relationExpressionTypes $rel.Expression }}if len(objects.{{ typeName $relType }}) > 0 {
-    err := authz.GetEngine(ctx).CreateRelations(authz.Resource{
+    err := authz.GetEngine(ctx).CreateRelations(ctx, authz.Resource{
       Type: Type{{ $typeName }},
       ID: authz.ID({{ $var }}),
     }, authz.Relation({{ $typeName }}{{ snakeToPascal $rel.Name }}), Type{{ typeName $relType }}, authz.IDs(objects.{{ typeName $relType }}))
@@ -34,7 +34,7 @@ func ({{ $var }} {{ $typeName }}) Create{{ snakeToPascal $rel.Name}}Relations(ct
 {{ end }}{{ $var := .ObjectType.Name }}{{ range $rel := .Relations }}
 func ({{ $var }} {{ $typeName }}) Delete{{ snakeToPascal $rel.Name}}Relations(ctx context.Context, objects {{ $typeName }}{{ snakeToPascal $rel.Name }}Objects) error {
   {{ range $idx, $relType := relationExpressionTypes $rel.Expression }}if len(objects.{{ typeName $relType }}) > 0 {
-    err := authz.GetEngine(ctx).DeleteRelations(authz.Resource{
+    err := authz.GetEngine(ctx).DeleteRelations(ctx, authz.Resource{
       Type: Type{{ $typeName }},
       ID: authz.ID({{ $var }}),
     }, authz.Relation({{ $typeName }}{{ snakeToPascal $rel.Name }}), Type{{ typeName $relType }}, authz.IDs(objects.{{ typeName $relType }}))
@@ -46,7 +46,7 @@ func ({{ $var }} {{ $typeName }}) Delete{{ snakeToPascal $rel.Name}}Relations(ct
 }
 {{ end }}{{ range $rel := .Relations }}{{ range $idx, $relType := relationExpressionTypes $rel.Expression }}
 func ({{ $var }} {{ $typeName }}) Read{{ snakeToPascal $rel.Name}}{{ typeName $relType }}Relations(ctx context.Context) ([]{{ typeName $relType }}, error) {
-  ids, err := authz.GetEngine(ctx).ReadRelations(authz.Resource{
+  ids, err := authz.GetEngine(ctx).ReadRelations(ctx, authz.Resource{
     Type: Type{{ $typeName }},
     ID: authz.ID({{ $var }}),
   }, authz.Relation({{ $typeName }}{{ snakeToPascal $rel.Name }}), Type{{ typeName $relType }})
@@ -69,7 +69,7 @@ func ({{ $var }} {{ $typeName }}) Check{{ snakeToPascal $perm.Name }}(ctx contex
   }
 
   {{ range $inputType := permissionInputTypes $objectType $perm.Name }}if len(input.{{ typeName $inputType }}) > 0 {
-    err := authz.GetEngine(ctx).CheckPermission(authz.Resource{
+    err := authz.GetEngine(ctx).CheckPermission(ctx, authz.Resource{
       Type: Type{{ $typeName }},
       ID: authz.ID({{ $var }}),
     }, authz.Permission({{ $typeName }}{{ snakeToPascal $perm.Name }}), Type{{ typeName $inputType }}, authz.IDs(input.{{ typeName $inputType }}))
@@ -83,7 +83,7 @@ func ({{ $var }} {{ $typeName }}) Check{{ snakeToPascal $perm.Name }}(ctx contex
 
 func Lookup{{ snakeToPascal $perm.Name }}{{ $typeName }}Resources(ctx context.Context, input {{ $inputName }}) ([]{{ $typeName }}, error) {
   {{ range $inputType := permissionInputTypes $objectType $perm.Name }}if len(input.{{ typeName $inputType }}) > 0 {
-    ids, err := authz.GetEngine(ctx).LookupResources(
+    ids, err := authz.GetEngine(ctx).LookupResources(ctx,
       Type{{ $typeName }}, authz.Permission({{ $typeName }}{{ snakeToPascal $perm.Name }}), 
       Type{{ typeName $inputType }}, authz.IDs(input.{{ typeName $inputType }}),
     )
@@ -98,7 +98,7 @@ func Lookup{{ snakeToPascal $perm.Name }}{{ $typeName }}Resources(ctx context.Co
 }
 {{ end }}{{ range $perm := .Permissions }}
 {{ range $inputType := permissionInputTypes $objectType $perm.Name }}func ({{ $var }} {{ $typeName }}) Lookup{{ snakeToPascal $perm.Name }}{{ typeName $inputType }}Subjects(ctx context.Context) ([]{{ typeName $inputType }}, error) {
-  ids, err := authz.GetEngine(ctx).LookupSubjects(
+  ids, err := authz.GetEngine(ctx).LookupSubjects(ctx,
     authz.Resource{
       Type: Type{{ $typeName }},
       ID: authz.ID({{ $var }}),

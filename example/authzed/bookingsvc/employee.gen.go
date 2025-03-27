@@ -29,7 +29,7 @@ type Employee authz.ID
 
 func (employee Employee) CreateAccountRelations(ctx context.Context, objects EmployeeAccountObjects) error {
   if len(objects.User) > 0 {
-    err := authz.GetEngine(ctx).CreateRelations(authz.Resource{
+    err := authz.GetEngine(ctx).CreateRelations(ctx, authz.Resource{
       Type: TypeEmployee,
       ID: authz.ID(employee),
     }, authz.Relation(EmployeeAccount), TypeUser, authz.IDs(objects.User))
@@ -42,7 +42,7 @@ func (employee Employee) CreateAccountRelations(ctx context.Context, objects Emp
 
 func (employee Employee) CreateBelongsBrandRelations(ctx context.Context, objects EmployeeBelongsBrandObjects) error {
   if len(objects.Brand) > 0 {
-    err := authz.GetEngine(ctx).CreateRelations(authz.Resource{
+    err := authz.GetEngine(ctx).CreateRelations(ctx, authz.Resource{
       Type: TypeEmployee,
       ID: authz.ID(employee),
     }, authz.Relation(EmployeeBelongsBrand), TypeBrand, authz.IDs(objects.Brand))
@@ -55,7 +55,7 @@ func (employee Employee) CreateBelongsBrandRelations(ctx context.Context, object
 
 func (employee Employee) CreateViewerRelations(ctx context.Context, objects EmployeeViewerObjects) error {
   if len(objects.User) > 0 {
-    err := authz.GetEngine(ctx).CreateRelations(authz.Resource{
+    err := authz.GetEngine(ctx).CreateRelations(ctx, authz.Resource{
       Type: TypeEmployee,
       ID: authz.ID(employee),
     }, authz.Relation(EmployeeViewer), TypeUser, authz.IDs(objects.User))
@@ -68,7 +68,7 @@ func (employee Employee) CreateViewerRelations(ctx context.Context, objects Empl
 
 func (employee Employee) DeleteAccountRelations(ctx context.Context, objects EmployeeAccountObjects) error {
   if len(objects.User) > 0 {
-    err := authz.GetEngine(ctx).DeleteRelations(authz.Resource{
+    err := authz.GetEngine(ctx).DeleteRelations(ctx, authz.Resource{
       Type: TypeEmployee,
       ID: authz.ID(employee),
     }, authz.Relation(EmployeeAccount), TypeUser, authz.IDs(objects.User))
@@ -81,7 +81,7 @@ func (employee Employee) DeleteAccountRelations(ctx context.Context, objects Emp
 
 func (employee Employee) DeleteBelongsBrandRelations(ctx context.Context, objects EmployeeBelongsBrandObjects) error {
   if len(objects.Brand) > 0 {
-    err := authz.GetEngine(ctx).DeleteRelations(authz.Resource{
+    err := authz.GetEngine(ctx).DeleteRelations(ctx, authz.Resource{
       Type: TypeEmployee,
       ID: authz.ID(employee),
     }, authz.Relation(EmployeeBelongsBrand), TypeBrand, authz.IDs(objects.Brand))
@@ -94,7 +94,7 @@ func (employee Employee) DeleteBelongsBrandRelations(ctx context.Context, object
 
 func (employee Employee) DeleteViewerRelations(ctx context.Context, objects EmployeeViewerObjects) error {
   if len(objects.User) > 0 {
-    err := authz.GetEngine(ctx).DeleteRelations(authz.Resource{
+    err := authz.GetEngine(ctx).DeleteRelations(ctx, authz.Resource{
       Type: TypeEmployee,
       ID: authz.ID(employee),
     }, authz.Relation(EmployeeViewer), TypeUser, authz.IDs(objects.User))
@@ -106,7 +106,7 @@ func (employee Employee) DeleteViewerRelations(ctx context.Context, objects Empl
 }
 
 func (employee Employee) ReadAccountUserRelations(ctx context.Context) ([]User, error) {
-  ids, err := authz.GetEngine(ctx).ReadRelations(authz.Resource{
+  ids, err := authz.GetEngine(ctx).ReadRelations(ctx, authz.Resource{
     Type: TypeEmployee,
     ID: authz.ID(employee),
   }, authz.Relation(EmployeeAccount), TypeUser)
@@ -118,7 +118,7 @@ func (employee Employee) ReadAccountUserRelations(ctx context.Context) ([]User, 
 }
 
 func (employee Employee) ReadBelongsBrandBrandRelations(ctx context.Context) ([]Brand, error) {
-  ids, err := authz.GetEngine(ctx).ReadRelations(authz.Resource{
+  ids, err := authz.GetEngine(ctx).ReadRelations(ctx, authz.Resource{
     Type: TypeEmployee,
     ID: authz.ID(employee),
   }, authz.Relation(EmployeeBelongsBrand), TypeBrand)
@@ -130,7 +130,7 @@ func (employee Employee) ReadBelongsBrandBrandRelations(ctx context.Context) ([]
 }
 
 func (employee Employee) ReadViewerUserRelations(ctx context.Context) ([]User, error) {
-  ids, err := authz.GetEngine(ctx).ReadRelations(authz.Resource{
+  ids, err := authz.GetEngine(ctx).ReadRelations(ctx, authz.Resource{
     Type: TypeEmployee,
     ID: authz.ID(employee),
   }, authz.Relation(EmployeeViewer), TypeUser)
@@ -153,7 +153,7 @@ func (employee Employee) CheckManage(ctx context.Context, input CheckEmployeeMan
   }
 
   if len(input.User) > 0 {
-    err := authz.GetEngine(ctx).CheckPermission(authz.Resource{
+    err := authz.GetEngine(ctx).CheckPermission(ctx, authz.Resource{
       Type: TypeEmployee,
       ID: authz.ID(employee),
     }, authz.Permission(EmployeeManage), TypeUser, authz.IDs(input.User))
@@ -167,7 +167,7 @@ func (employee Employee) CheckManage(ctx context.Context, input CheckEmployeeMan
 
 func LookupManageEmployeeResources(ctx context.Context, input CheckEmployeeManageInputs) ([]Employee, error) {
   if len(input.User) > 0 {
-    ids, err := authz.GetEngine(ctx).LookupResources(
+    ids, err := authz.GetEngine(ctx).LookupResources(ctx,
       TypeEmployee, authz.Permission(EmployeeManage), 
       TypeUser, authz.IDs(input.User),
     )
@@ -192,7 +192,7 @@ func (employee Employee) CheckView(ctx context.Context, input CheckEmployeeViewI
   }
 
   if len(input.User) > 0 {
-    err := authz.GetEngine(ctx).CheckPermission(authz.Resource{
+    err := authz.GetEngine(ctx).CheckPermission(ctx, authz.Resource{
       Type: TypeEmployee,
       ID: authz.ID(employee),
     }, authz.Permission(EmployeeView), TypeUser, authz.IDs(input.User))
@@ -206,7 +206,7 @@ func (employee Employee) CheckView(ctx context.Context, input CheckEmployeeViewI
 
 func LookupViewEmployeeResources(ctx context.Context, input CheckEmployeeViewInputs) ([]Employee, error) {
   if len(input.User) > 0 {
-    ids, err := authz.GetEngine(ctx).LookupResources(
+    ids, err := authz.GetEngine(ctx).LookupResources(ctx,
       TypeEmployee, authz.Permission(EmployeeView), 
       TypeUser, authz.IDs(input.User),
     )
@@ -221,7 +221,7 @@ func LookupViewEmployeeResources(ctx context.Context, input CheckEmployeeViewInp
 }
 
 func (employee Employee) LookupManageUserSubjects(ctx context.Context) ([]User, error) {
-  ids, err := authz.GetEngine(ctx).LookupSubjects(
+  ids, err := authz.GetEngine(ctx).LookupSubjects(ctx,
     authz.Resource{
       Type: TypeEmployee,
       ID: authz.ID(employee),
@@ -236,7 +236,7 @@ func (employee Employee) LookupManageUserSubjects(ctx context.Context) ([]User, 
 }
 
 func (employee Employee) LookupViewUserSubjects(ctx context.Context) ([]User, error) {
-  ids, err := authz.GetEngine(ctx).LookupSubjects(
+  ids, err := authz.GetEngine(ctx).LookupSubjects(ctx,
     authz.Resource{
       Type: TypeEmployee,
       ID: authz.ID(employee),

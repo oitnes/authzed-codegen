@@ -29,7 +29,7 @@ type Brand authz.ID
 
 func (brand Brand) CreateAdminRelations(ctx context.Context, objects BrandAdminObjects) error {
   if len(objects.User) > 0 {
-    err := authz.GetEngine(ctx).CreateRelations(authz.Resource{
+    err := authz.GetEngine(ctx).CreateRelations(ctx, authz.Resource{
       Type: TypeBrand,
       ID: authz.ID(brand),
     }, authz.Relation(BrandAdmin), TypeUser, authz.IDs(objects.User))
@@ -42,7 +42,7 @@ func (brand Brand) CreateAdminRelations(ctx context.Context, objects BrandAdminO
 
 func (brand Brand) CreateManagerRelations(ctx context.Context, objects BrandManagerObjects) error {
   if len(objects.Employee) > 0 {
-    err := authz.GetEngine(ctx).CreateRelations(authz.Resource{
+    err := authz.GetEngine(ctx).CreateRelations(ctx, authz.Resource{
       Type: TypeBrand,
       ID: authz.ID(brand),
     }, authz.Relation(BrandManager), TypeEmployee, authz.IDs(objects.Employee))
@@ -55,7 +55,7 @@ func (brand Brand) CreateManagerRelations(ctx context.Context, objects BrandMana
 
 func (brand Brand) CreateEmployeeRelations(ctx context.Context, objects BrandEmployeeObjects) error {
   if len(objects.Employee) > 0 {
-    err := authz.GetEngine(ctx).CreateRelations(authz.Resource{
+    err := authz.GetEngine(ctx).CreateRelations(ctx, authz.Resource{
       Type: TypeBrand,
       ID: authz.ID(brand),
     }, authz.Relation(BrandEmployee), TypeEmployee, authz.IDs(objects.Employee))
@@ -68,7 +68,7 @@ func (brand Brand) CreateEmployeeRelations(ctx context.Context, objects BrandEmp
 
 func (brand Brand) DeleteAdminRelations(ctx context.Context, objects BrandAdminObjects) error {
   if len(objects.User) > 0 {
-    err := authz.GetEngine(ctx).DeleteRelations(authz.Resource{
+    err := authz.GetEngine(ctx).DeleteRelations(ctx, authz.Resource{
       Type: TypeBrand,
       ID: authz.ID(brand),
     }, authz.Relation(BrandAdmin), TypeUser, authz.IDs(objects.User))
@@ -81,7 +81,7 @@ func (brand Brand) DeleteAdminRelations(ctx context.Context, objects BrandAdminO
 
 func (brand Brand) DeleteManagerRelations(ctx context.Context, objects BrandManagerObjects) error {
   if len(objects.Employee) > 0 {
-    err := authz.GetEngine(ctx).DeleteRelations(authz.Resource{
+    err := authz.GetEngine(ctx).DeleteRelations(ctx, authz.Resource{
       Type: TypeBrand,
       ID: authz.ID(brand),
     }, authz.Relation(BrandManager), TypeEmployee, authz.IDs(objects.Employee))
@@ -94,7 +94,7 @@ func (brand Brand) DeleteManagerRelations(ctx context.Context, objects BrandMana
 
 func (brand Brand) DeleteEmployeeRelations(ctx context.Context, objects BrandEmployeeObjects) error {
   if len(objects.Employee) > 0 {
-    err := authz.GetEngine(ctx).DeleteRelations(authz.Resource{
+    err := authz.GetEngine(ctx).DeleteRelations(ctx, authz.Resource{
       Type: TypeBrand,
       ID: authz.ID(brand),
     }, authz.Relation(BrandEmployee), TypeEmployee, authz.IDs(objects.Employee))
@@ -106,7 +106,7 @@ func (brand Brand) DeleteEmployeeRelations(ctx context.Context, objects BrandEmp
 }
 
 func (brand Brand) ReadAdminUserRelations(ctx context.Context) ([]User, error) {
-  ids, err := authz.GetEngine(ctx).ReadRelations(authz.Resource{
+  ids, err := authz.GetEngine(ctx).ReadRelations(ctx, authz.Resource{
     Type: TypeBrand,
     ID: authz.ID(brand),
   }, authz.Relation(BrandAdmin), TypeUser)
@@ -118,7 +118,7 @@ func (brand Brand) ReadAdminUserRelations(ctx context.Context) ([]User, error) {
 }
 
 func (brand Brand) ReadManagerEmployeeRelations(ctx context.Context) ([]Employee, error) {
-  ids, err := authz.GetEngine(ctx).ReadRelations(authz.Resource{
+  ids, err := authz.GetEngine(ctx).ReadRelations(ctx, authz.Resource{
     Type: TypeBrand,
     ID: authz.ID(brand),
   }, authz.Relation(BrandManager), TypeEmployee)
@@ -130,7 +130,7 @@ func (brand Brand) ReadManagerEmployeeRelations(ctx context.Context) ([]Employee
 }
 
 func (brand Brand) ReadEmployeeEmployeeRelations(ctx context.Context) ([]Employee, error) {
-  ids, err := authz.GetEngine(ctx).ReadRelations(authz.Resource{
+  ids, err := authz.GetEngine(ctx).ReadRelations(ctx, authz.Resource{
     Type: TypeBrand,
     ID: authz.ID(brand),
   }, authz.Relation(BrandEmployee), TypeEmployee)
@@ -154,7 +154,7 @@ func (brand Brand) CheckManage(ctx context.Context, input CheckBrandManageInputs
   }
 
   if len(input.Employee) > 0 {
-    err := authz.GetEngine(ctx).CheckPermission(authz.Resource{
+    err := authz.GetEngine(ctx).CheckPermission(ctx, authz.Resource{
       Type: TypeBrand,
       ID: authz.ID(brand),
     }, authz.Permission(BrandManage), TypeEmployee, authz.IDs(input.Employee))
@@ -163,7 +163,7 @@ func (brand Brand) CheckManage(ctx context.Context, input CheckBrandManageInputs
     }
   }
   if len(input.User) > 0 {
-    err := authz.GetEngine(ctx).CheckPermission(authz.Resource{
+    err := authz.GetEngine(ctx).CheckPermission(ctx, authz.Resource{
       Type: TypeBrand,
       ID: authz.ID(brand),
     }, authz.Permission(BrandManage), TypeUser, authz.IDs(input.User))
@@ -177,7 +177,7 @@ func (brand Brand) CheckManage(ctx context.Context, input CheckBrandManageInputs
 
 func LookupManageBrandResources(ctx context.Context, input CheckBrandManageInputs) ([]Brand, error) {
   if len(input.Employee) > 0 {
-    ids, err := authz.GetEngine(ctx).LookupResources(
+    ids, err := authz.GetEngine(ctx).LookupResources(ctx,
       TypeBrand, authz.Permission(BrandManage), 
       TypeEmployee, authz.IDs(input.Employee),
     )
@@ -188,7 +188,7 @@ func LookupManageBrandResources(ctx context.Context, input CheckBrandManageInput
     return authz.FromIDs[Brand](ids), nil
   }
   if len(input.User) > 0 {
-    ids, err := authz.GetEngine(ctx).LookupResources(
+    ids, err := authz.GetEngine(ctx).LookupResources(ctx,
       TypeBrand, authz.Permission(BrandManage), 
       TypeUser, authz.IDs(input.User),
     )
@@ -214,7 +214,7 @@ func (brand Brand) CheckCreateBooking(ctx context.Context, input CheckBrandCreat
   }
 
   if len(input.User) > 0 {
-    err := authz.GetEngine(ctx).CheckPermission(authz.Resource{
+    err := authz.GetEngine(ctx).CheckPermission(ctx, authz.Resource{
       Type: TypeBrand,
       ID: authz.ID(brand),
     }, authz.Permission(BrandCreateBooking), TypeUser, authz.IDs(input.User))
@@ -223,7 +223,7 @@ func (brand Brand) CheckCreateBooking(ctx context.Context, input CheckBrandCreat
     }
   }
   if len(input.Employee) > 0 {
-    err := authz.GetEngine(ctx).CheckPermission(authz.Resource{
+    err := authz.GetEngine(ctx).CheckPermission(ctx, authz.Resource{
       Type: TypeBrand,
       ID: authz.ID(brand),
     }, authz.Permission(BrandCreateBooking), TypeEmployee, authz.IDs(input.Employee))
@@ -237,7 +237,7 @@ func (brand Brand) CheckCreateBooking(ctx context.Context, input CheckBrandCreat
 
 func LookupCreateBookingBrandResources(ctx context.Context, input CheckBrandCreateBookingInputs) ([]Brand, error) {
   if len(input.User) > 0 {
-    ids, err := authz.GetEngine(ctx).LookupResources(
+    ids, err := authz.GetEngine(ctx).LookupResources(ctx,
       TypeBrand, authz.Permission(BrandCreateBooking), 
       TypeUser, authz.IDs(input.User),
     )
@@ -248,7 +248,7 @@ func LookupCreateBookingBrandResources(ctx context.Context, input CheckBrandCrea
     return authz.FromIDs[Brand](ids), nil
   }
   if len(input.Employee) > 0 {
-    ids, err := authz.GetEngine(ctx).LookupResources(
+    ids, err := authz.GetEngine(ctx).LookupResources(ctx,
       TypeBrand, authz.Permission(BrandCreateBooking), 
       TypeEmployee, authz.IDs(input.Employee),
     )
@@ -263,7 +263,7 @@ func LookupCreateBookingBrandResources(ctx context.Context, input CheckBrandCrea
 }
 
 func (brand Brand) LookupManageEmployeeSubjects(ctx context.Context) ([]Employee, error) {
-  ids, err := authz.GetEngine(ctx).LookupSubjects(
+  ids, err := authz.GetEngine(ctx).LookupSubjects(ctx,
     authz.Resource{
       Type: TypeBrand,
       ID: authz.ID(brand),
@@ -277,7 +277,7 @@ func (brand Brand) LookupManageEmployeeSubjects(ctx context.Context) ([]Employee
   return authz.FromIDs[Employee](ids), nil
 }
 func (brand Brand) LookupManageUserSubjects(ctx context.Context) ([]User, error) {
-  ids, err := authz.GetEngine(ctx).LookupSubjects(
+  ids, err := authz.GetEngine(ctx).LookupSubjects(ctx,
     authz.Resource{
       Type: TypeBrand,
       ID: authz.ID(brand),
@@ -292,7 +292,7 @@ func (brand Brand) LookupManageUserSubjects(ctx context.Context) ([]User, error)
 }
 
 func (brand Brand) LookupCreateBookingUserSubjects(ctx context.Context) ([]User, error) {
-  ids, err := authz.GetEngine(ctx).LookupSubjects(
+  ids, err := authz.GetEngine(ctx).LookupSubjects(ctx,
     authz.Resource{
       Type: TypeBrand,
       ID: authz.ID(brand),
@@ -306,7 +306,7 @@ func (brand Brand) LookupCreateBookingUserSubjects(ctx context.Context) ([]User,
   return authz.FromIDs[User](ids), nil
 }
 func (brand Brand) LookupCreateBookingEmployeeSubjects(ctx context.Context) ([]Employee, error) {
-  ids, err := authz.GetEngine(ctx).LookupSubjects(
+  ids, err := authz.GetEngine(ctx).LookupSubjects(ctx,
     authz.Resource{
       Type: TypeBrand,
       ID: authz.ID(brand),

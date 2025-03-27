@@ -21,7 +21,7 @@ type Setting authz.ID
 
 func (setting Setting) CreateOwnerRelations(ctx context.Context, objects SettingOwnerObjects) error {
   if len(objects.Company) > 0 {
-    err := authz.GetEngine(ctx).CreateRelations(authz.Resource{
+    err := authz.GetEngine(ctx).CreateRelations(ctx, authz.Resource{
       Type: TypeSetting,
       ID: authz.ID(setting),
     }, authz.Relation(SettingOwner), TypeCompany, authz.IDs(objects.Company))
@@ -34,7 +34,7 @@ func (setting Setting) CreateOwnerRelations(ctx context.Context, objects Setting
 
 func (setting Setting) DeleteOwnerRelations(ctx context.Context, objects SettingOwnerObjects) error {
   if len(objects.Company) > 0 {
-    err := authz.GetEngine(ctx).DeleteRelations(authz.Resource{
+    err := authz.GetEngine(ctx).DeleteRelations(ctx, authz.Resource{
       Type: TypeSetting,
       ID: authz.ID(setting),
     }, authz.Relation(SettingOwner), TypeCompany, authz.IDs(objects.Company))
@@ -46,7 +46,7 @@ func (setting Setting) DeleteOwnerRelations(ctx context.Context, objects Setting
 }
 
 func (setting Setting) ReadOwnerCompanyRelations(ctx context.Context) ([]Company, error) {
-  ids, err := authz.GetEngine(ctx).ReadRelations(authz.Resource{
+  ids, err := authz.GetEngine(ctx).ReadRelations(ctx, authz.Resource{
     Type: TypeSetting,
     ID: authz.ID(setting),
   }, authz.Relation(SettingOwner), TypeCompany)
@@ -69,7 +69,7 @@ func (setting Setting) CheckWrite(ctx context.Context, input CheckSettingWriteIn
   }
 
   if len(input.User) > 0 {
-    err := authz.GetEngine(ctx).CheckPermission(authz.Resource{
+    err := authz.GetEngine(ctx).CheckPermission(ctx, authz.Resource{
       Type: TypeSetting,
       ID: authz.ID(setting),
     }, authz.Permission(SettingWrite), TypeUser, authz.IDs(input.User))
@@ -83,7 +83,7 @@ func (setting Setting) CheckWrite(ctx context.Context, input CheckSettingWriteIn
 
 func LookupWriteSettingResources(ctx context.Context, input CheckSettingWriteInputs) ([]Setting, error) {
   if len(input.User) > 0 {
-    ids, err := authz.GetEngine(ctx).LookupResources(
+    ids, err := authz.GetEngine(ctx).LookupResources(ctx,
       TypeSetting, authz.Permission(SettingWrite), 
       TypeUser, authz.IDs(input.User),
     )
@@ -98,7 +98,7 @@ func LookupWriteSettingResources(ctx context.Context, input CheckSettingWriteInp
 }
 
 func (setting Setting) LookupWriteUserSubjects(ctx context.Context) ([]User, error) {
-  ids, err := authz.GetEngine(ctx).LookupSubjects(
+  ids, err := authz.GetEngine(ctx).LookupSubjects(ctx,
     authz.Resource{
       Type: TypeSetting,
       ID: authz.ID(setting),

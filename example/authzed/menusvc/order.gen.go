@@ -26,7 +26,7 @@ type Order authz.ID
 
 func (order Order) CreateCreatorRelations(ctx context.Context, objects OrderCreatorObjects) error {
   if len(objects.User) > 0 {
-    err := authz.GetEngine(ctx).CreateRelations(authz.Resource{
+    err := authz.GetEngine(ctx).CreateRelations(ctx, authz.Resource{
       Type: TypeOrder,
       ID: authz.ID(order),
     }, authz.Relation(OrderCreator), TypeUser, authz.IDs(objects.User))
@@ -35,7 +35,7 @@ func (order Order) CreateCreatorRelations(ctx context.Context, objects OrderCrea
     }
   }
   if len(objects.Customer) > 0 {
-    err := authz.GetEngine(ctx).CreateRelations(authz.Resource{
+    err := authz.GetEngine(ctx).CreateRelations(ctx, authz.Resource{
       Type: TypeOrder,
       ID: authz.ID(order),
     }, authz.Relation(OrderCreator), TypeCustomer, authz.IDs(objects.Customer))
@@ -48,7 +48,7 @@ func (order Order) CreateCreatorRelations(ctx context.Context, objects OrderCrea
 
 func (order Order) CreateBelongsCompanyRelations(ctx context.Context, objects OrderBelongsCompanyObjects) error {
   if len(objects.Company) > 0 {
-    err := authz.GetEngine(ctx).CreateRelations(authz.Resource{
+    err := authz.GetEngine(ctx).CreateRelations(ctx, authz.Resource{
       Type: TypeOrder,
       ID: authz.ID(order),
     }, authz.Relation(OrderBelongsCompany), TypeCompany, authz.IDs(objects.Company))
@@ -61,7 +61,7 @@ func (order Order) CreateBelongsCompanyRelations(ctx context.Context, objects Or
 
 func (order Order) DeleteCreatorRelations(ctx context.Context, objects OrderCreatorObjects) error {
   if len(objects.User) > 0 {
-    err := authz.GetEngine(ctx).DeleteRelations(authz.Resource{
+    err := authz.GetEngine(ctx).DeleteRelations(ctx, authz.Resource{
       Type: TypeOrder,
       ID: authz.ID(order),
     }, authz.Relation(OrderCreator), TypeUser, authz.IDs(objects.User))
@@ -70,7 +70,7 @@ func (order Order) DeleteCreatorRelations(ctx context.Context, objects OrderCrea
     }
   }
   if len(objects.Customer) > 0 {
-    err := authz.GetEngine(ctx).DeleteRelations(authz.Resource{
+    err := authz.GetEngine(ctx).DeleteRelations(ctx, authz.Resource{
       Type: TypeOrder,
       ID: authz.ID(order),
     }, authz.Relation(OrderCreator), TypeCustomer, authz.IDs(objects.Customer))
@@ -83,7 +83,7 @@ func (order Order) DeleteCreatorRelations(ctx context.Context, objects OrderCrea
 
 func (order Order) DeleteBelongsCompanyRelations(ctx context.Context, objects OrderBelongsCompanyObjects) error {
   if len(objects.Company) > 0 {
-    err := authz.GetEngine(ctx).DeleteRelations(authz.Resource{
+    err := authz.GetEngine(ctx).DeleteRelations(ctx, authz.Resource{
       Type: TypeOrder,
       ID: authz.ID(order),
     }, authz.Relation(OrderBelongsCompany), TypeCompany, authz.IDs(objects.Company))
@@ -95,7 +95,7 @@ func (order Order) DeleteBelongsCompanyRelations(ctx context.Context, objects Or
 }
 
 func (order Order) ReadCreatorUserRelations(ctx context.Context) ([]User, error) {
-  ids, err := authz.GetEngine(ctx).ReadRelations(authz.Resource{
+  ids, err := authz.GetEngine(ctx).ReadRelations(ctx, authz.Resource{
     Type: TypeOrder,
     ID: authz.ID(order),
   }, authz.Relation(OrderCreator), TypeUser)
@@ -107,7 +107,7 @@ func (order Order) ReadCreatorUserRelations(ctx context.Context) ([]User, error)
 }
 
 func (order Order) ReadCreatorCustomerRelations(ctx context.Context) ([]Customer, error) {
-  ids, err := authz.GetEngine(ctx).ReadRelations(authz.Resource{
+  ids, err := authz.GetEngine(ctx).ReadRelations(ctx, authz.Resource{
     Type: TypeOrder,
     ID: authz.ID(order),
   }, authz.Relation(OrderCreator), TypeCustomer)
@@ -119,7 +119,7 @@ func (order Order) ReadCreatorCustomerRelations(ctx context.Context) ([]Customer
 }
 
 func (order Order) ReadBelongsCompanyCompanyRelations(ctx context.Context) ([]Company, error) {
-  ids, err := authz.GetEngine(ctx).ReadRelations(authz.Resource{
+  ids, err := authz.GetEngine(ctx).ReadRelations(ctx, authz.Resource{
     Type: TypeOrder,
     ID: authz.ID(order),
   }, authz.Relation(OrderBelongsCompany), TypeCompany)
@@ -143,7 +143,7 @@ func (order Order) CheckWrite(ctx context.Context, input CheckOrderWriteInputs) 
   }
 
   if len(input.User) > 0 {
-    err := authz.GetEngine(ctx).CheckPermission(authz.Resource{
+    err := authz.GetEngine(ctx).CheckPermission(ctx, authz.Resource{
       Type: TypeOrder,
       ID: authz.ID(order),
     }, authz.Permission(OrderWrite), TypeUser, authz.IDs(input.User))
@@ -152,7 +152,7 @@ func (order Order) CheckWrite(ctx context.Context, input CheckOrderWriteInputs) 
     }
   }
   if len(input.Customer) > 0 {
-    err := authz.GetEngine(ctx).CheckPermission(authz.Resource{
+    err := authz.GetEngine(ctx).CheckPermission(ctx, authz.Resource{
       Type: TypeOrder,
       ID: authz.ID(order),
     }, authz.Permission(OrderWrite), TypeCustomer, authz.IDs(input.Customer))
@@ -166,7 +166,7 @@ func (order Order) CheckWrite(ctx context.Context, input CheckOrderWriteInputs) 
 
 func LookupWriteOrderResources(ctx context.Context, input CheckOrderWriteInputs) ([]Order, error) {
   if len(input.User) > 0 {
-    ids, err := authz.GetEngine(ctx).LookupResources(
+    ids, err := authz.GetEngine(ctx).LookupResources(ctx,
       TypeOrder, authz.Permission(OrderWrite), 
       TypeUser, authz.IDs(input.User),
     )
@@ -177,7 +177,7 @@ func LookupWriteOrderResources(ctx context.Context, input CheckOrderWriteInputs)
     return authz.FromIDs[Order](ids), nil
   }
   if len(input.Customer) > 0 {
-    ids, err := authz.GetEngine(ctx).LookupResources(
+    ids, err := authz.GetEngine(ctx).LookupResources(ctx,
       TypeOrder, authz.Permission(OrderWrite), 
       TypeCustomer, authz.IDs(input.Customer),
     )
@@ -192,7 +192,7 @@ func LookupWriteOrderResources(ctx context.Context, input CheckOrderWriteInputs)
 }
 
 func (order Order) LookupWriteUserSubjects(ctx context.Context) ([]User, error) {
-  ids, err := authz.GetEngine(ctx).LookupSubjects(
+  ids, err := authz.GetEngine(ctx).LookupSubjects(ctx,
     authz.Resource{
       Type: TypeOrder,
       ID: authz.ID(order),
@@ -206,7 +206,7 @@ func (order Order) LookupWriteUserSubjects(ctx context.Context) ([]User, error) 
   return authz.FromIDs[User](ids), nil
 }
 func (order Order) LookupWriteCustomerSubjects(ctx context.Context) ([]Customer, error) {
-  ids, err := authz.GetEngine(ctx).LookupSubjects(
+  ids, err := authz.GetEngine(ctx).LookupSubjects(ctx,
     authz.Resource{
       Type: TypeOrder,
       ID: authz.ID(order),

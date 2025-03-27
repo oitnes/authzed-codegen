@@ -21,7 +21,7 @@ type User authz.ID
 
 func (user User) CreateBelongsCompanyRelations(ctx context.Context, objects UserBelongsCompanyObjects) error {
   if len(objects.Company) > 0 {
-    err := authz.GetEngine(ctx).CreateRelations(authz.Resource{
+    err := authz.GetEngine(ctx).CreateRelations(ctx, authz.Resource{
       Type: TypeUser,
       ID: authz.ID(user),
     }, authz.Relation(UserBelongsCompany), TypeCompany, authz.IDs(objects.Company))
@@ -34,7 +34,7 @@ func (user User) CreateBelongsCompanyRelations(ctx context.Context, objects User
 
 func (user User) DeleteBelongsCompanyRelations(ctx context.Context, objects UserBelongsCompanyObjects) error {
   if len(objects.Company) > 0 {
-    err := authz.GetEngine(ctx).DeleteRelations(authz.Resource{
+    err := authz.GetEngine(ctx).DeleteRelations(ctx, authz.Resource{
       Type: TypeUser,
       ID: authz.ID(user),
     }, authz.Relation(UserBelongsCompany), TypeCompany, authz.IDs(objects.Company))
@@ -46,7 +46,7 @@ func (user User) DeleteBelongsCompanyRelations(ctx context.Context, objects User
 }
 
 func (user User) ReadBelongsCompanyCompanyRelations(ctx context.Context) ([]Company, error) {
-  ids, err := authz.GetEngine(ctx).ReadRelations(authz.Resource{
+  ids, err := authz.GetEngine(ctx).ReadRelations(ctx, authz.Resource{
     Type: TypeUser,
     ID: authz.ID(user),
   }, authz.Relation(UserBelongsCompany), TypeCompany)
@@ -69,7 +69,7 @@ func (user User) CheckManage(ctx context.Context, input CheckUserManageInputs) (
   }
 
   if len(input.User) > 0 {
-    err := authz.GetEngine(ctx).CheckPermission(authz.Resource{
+    err := authz.GetEngine(ctx).CheckPermission(ctx, authz.Resource{
       Type: TypeUser,
       ID: authz.ID(user),
     }, authz.Permission(UserManage), TypeUser, authz.IDs(input.User))
@@ -83,7 +83,7 @@ func (user User) CheckManage(ctx context.Context, input CheckUserManageInputs) (
 
 func LookupManageUserResources(ctx context.Context, input CheckUserManageInputs) ([]User, error) {
   if len(input.User) > 0 {
-    ids, err := authz.GetEngine(ctx).LookupResources(
+    ids, err := authz.GetEngine(ctx).LookupResources(ctx,
       TypeUser, authz.Permission(UserManage), 
       TypeUser, authz.IDs(input.User),
     )
@@ -98,7 +98,7 @@ func LookupManageUserResources(ctx context.Context, input CheckUserManageInputs)
 }
 
 func (user User) LookupManageUserSubjects(ctx context.Context) ([]User, error) {
-  ids, err := authz.GetEngine(ctx).LookupSubjects(
+  ids, err := authz.GetEngine(ctx).LookupSubjects(ctx,
     authz.Resource{
       Type: TypeUser,
       ID: authz.ID(user),

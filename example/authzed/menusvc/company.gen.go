@@ -29,7 +29,7 @@ type Company authz.ID
 
 func (company Company) CreateAdminRelations(ctx context.Context, objects CompanyAdminObjects) error {
   if len(objects.User) > 0 {
-    err := authz.GetEngine(ctx).CreateRelations(authz.Resource{
+    err := authz.GetEngine(ctx).CreateRelations(ctx, authz.Resource{
       Type: TypeCompany,
       ID: authz.ID(company),
     }, authz.Relation(CompanyAdmin), TypeUser, authz.IDs(objects.User))
@@ -42,7 +42,7 @@ func (company Company) CreateAdminRelations(ctx context.Context, objects Company
 
 func (company Company) CreateManagerRelations(ctx context.Context, objects CompanyManagerObjects) error {
   if len(objects.User) > 0 {
-    err := authz.GetEngine(ctx).CreateRelations(authz.Resource{
+    err := authz.GetEngine(ctx).CreateRelations(ctx, authz.Resource{
       Type: TypeCompany,
       ID: authz.ID(company),
     }, authz.Relation(CompanyManager), TypeUser, authz.IDs(objects.User))
@@ -55,7 +55,7 @@ func (company Company) CreateManagerRelations(ctx context.Context, objects Compa
 
 func (company Company) CreateEmployeeRelations(ctx context.Context, objects CompanyEmployeeObjects) error {
   if len(objects.User) > 0 {
-    err := authz.GetEngine(ctx).CreateRelations(authz.Resource{
+    err := authz.GetEngine(ctx).CreateRelations(ctx, authz.Resource{
       Type: TypeCompany,
       ID: authz.ID(company),
     }, authz.Relation(CompanyEmployee), TypeUser, authz.IDs(objects.User))
@@ -68,7 +68,7 @@ func (company Company) CreateEmployeeRelations(ctx context.Context, objects Comp
 
 func (company Company) DeleteAdminRelations(ctx context.Context, objects CompanyAdminObjects) error {
   if len(objects.User) > 0 {
-    err := authz.GetEngine(ctx).DeleteRelations(authz.Resource{
+    err := authz.GetEngine(ctx).DeleteRelations(ctx, authz.Resource{
       Type: TypeCompany,
       ID: authz.ID(company),
     }, authz.Relation(CompanyAdmin), TypeUser, authz.IDs(objects.User))
@@ -81,7 +81,7 @@ func (company Company) DeleteAdminRelations(ctx context.Context, objects Company
 
 func (company Company) DeleteManagerRelations(ctx context.Context, objects CompanyManagerObjects) error {
   if len(objects.User) > 0 {
-    err := authz.GetEngine(ctx).DeleteRelations(authz.Resource{
+    err := authz.GetEngine(ctx).DeleteRelations(ctx, authz.Resource{
       Type: TypeCompany,
       ID: authz.ID(company),
     }, authz.Relation(CompanyManager), TypeUser, authz.IDs(objects.User))
@@ -94,7 +94,7 @@ func (company Company) DeleteManagerRelations(ctx context.Context, objects Compa
 
 func (company Company) DeleteEmployeeRelations(ctx context.Context, objects CompanyEmployeeObjects) error {
   if len(objects.User) > 0 {
-    err := authz.GetEngine(ctx).DeleteRelations(authz.Resource{
+    err := authz.GetEngine(ctx).DeleteRelations(ctx, authz.Resource{
       Type: TypeCompany,
       ID: authz.ID(company),
     }, authz.Relation(CompanyEmployee), TypeUser, authz.IDs(objects.User))
@@ -106,7 +106,7 @@ func (company Company) DeleteEmployeeRelations(ctx context.Context, objects Comp
 }
 
 func (company Company) ReadAdminUserRelations(ctx context.Context) ([]User, error) {
-  ids, err := authz.GetEngine(ctx).ReadRelations(authz.Resource{
+  ids, err := authz.GetEngine(ctx).ReadRelations(ctx, authz.Resource{
     Type: TypeCompany,
     ID: authz.ID(company),
   }, authz.Relation(CompanyAdmin), TypeUser)
@@ -118,7 +118,7 @@ func (company Company) ReadAdminUserRelations(ctx context.Context) ([]User, erro
 }
 
 func (company Company) ReadManagerUserRelations(ctx context.Context) ([]User, error) {
-  ids, err := authz.GetEngine(ctx).ReadRelations(authz.Resource{
+  ids, err := authz.GetEngine(ctx).ReadRelations(ctx, authz.Resource{
     Type: TypeCompany,
     ID: authz.ID(company),
   }, authz.Relation(CompanyManager), TypeUser)
@@ -130,7 +130,7 @@ func (company Company) ReadManagerUserRelations(ctx context.Context) ([]User, er
 }
 
 func (company Company) ReadEmployeeUserRelations(ctx context.Context) ([]User, error) {
-  ids, err := authz.GetEngine(ctx).ReadRelations(authz.Resource{
+  ids, err := authz.GetEngine(ctx).ReadRelations(ctx, authz.Resource{
     Type: TypeCompany,
     ID: authz.ID(company),
   }, authz.Relation(CompanyEmployee), TypeUser)
@@ -153,7 +153,7 @@ func (company Company) CheckManage(ctx context.Context, input CheckCompanyManage
   }
 
   if len(input.User) > 0 {
-    err := authz.GetEngine(ctx).CheckPermission(authz.Resource{
+    err := authz.GetEngine(ctx).CheckPermission(ctx, authz.Resource{
       Type: TypeCompany,
       ID: authz.ID(company),
     }, authz.Permission(CompanyManage), TypeUser, authz.IDs(input.User))
@@ -167,7 +167,7 @@ func (company Company) CheckManage(ctx context.Context, input CheckCompanyManage
 
 func LookupManageCompanyResources(ctx context.Context, input CheckCompanyManageInputs) ([]Company, error) {
   if len(input.User) > 0 {
-    ids, err := authz.GetEngine(ctx).LookupResources(
+    ids, err := authz.GetEngine(ctx).LookupResources(ctx,
       TypeCompany, authz.Permission(CompanyManage), 
       TypeUser, authz.IDs(input.User),
     )
@@ -192,7 +192,7 @@ func (company Company) CheckCreateBooking(ctx context.Context, input CheckCompan
   }
 
   if len(input.User) > 0 {
-    err := authz.GetEngine(ctx).CheckPermission(authz.Resource{
+    err := authz.GetEngine(ctx).CheckPermission(ctx, authz.Resource{
       Type: TypeCompany,
       ID: authz.ID(company),
     }, authz.Permission(CompanyCreateBooking), TypeUser, authz.IDs(input.User))
@@ -206,7 +206,7 @@ func (company Company) CheckCreateBooking(ctx context.Context, input CheckCompan
 
 func LookupCreateBookingCompanyResources(ctx context.Context, input CheckCompanyCreateBookingInputs) ([]Company, error) {
   if len(input.User) > 0 {
-    ids, err := authz.GetEngine(ctx).LookupResources(
+    ids, err := authz.GetEngine(ctx).LookupResources(ctx,
       TypeCompany, authz.Permission(CompanyCreateBooking), 
       TypeUser, authz.IDs(input.User),
     )
@@ -231,7 +231,7 @@ func (company Company) CheckCreateOrder(ctx context.Context, input CheckCompanyC
   }
 
   if len(input.User) > 0 {
-    err := authz.GetEngine(ctx).CheckPermission(authz.Resource{
+    err := authz.GetEngine(ctx).CheckPermission(ctx, authz.Resource{
       Type: TypeCompany,
       ID: authz.ID(company),
     }, authz.Permission(CompanyCreateOrder), TypeUser, authz.IDs(input.User))
@@ -245,7 +245,7 @@ func (company Company) CheckCreateOrder(ctx context.Context, input CheckCompanyC
 
 func LookupCreateOrderCompanyResources(ctx context.Context, input CheckCompanyCreateOrderInputs) ([]Company, error) {
   if len(input.User) > 0 {
-    ids, err := authz.GetEngine(ctx).LookupResources(
+    ids, err := authz.GetEngine(ctx).LookupResources(ctx,
       TypeCompany, authz.Permission(CompanyCreateOrder), 
       TypeUser, authz.IDs(input.User),
     )
@@ -260,7 +260,7 @@ func LookupCreateOrderCompanyResources(ctx context.Context, input CheckCompanyCr
 }
 
 func (company Company) LookupManageUserSubjects(ctx context.Context) ([]User, error) {
-  ids, err := authz.GetEngine(ctx).LookupSubjects(
+  ids, err := authz.GetEngine(ctx).LookupSubjects(ctx,
     authz.Resource{
       Type: TypeCompany,
       ID: authz.ID(company),
@@ -275,7 +275,7 @@ func (company Company) LookupManageUserSubjects(ctx context.Context) ([]User, er
 }
 
 func (company Company) LookupCreateBookingUserSubjects(ctx context.Context) ([]User, error) {
-  ids, err := authz.GetEngine(ctx).LookupSubjects(
+  ids, err := authz.GetEngine(ctx).LookupSubjects(ctx,
     authz.Resource{
       Type: TypeCompany,
       ID: authz.ID(company),
@@ -290,7 +290,7 @@ func (company Company) LookupCreateBookingUserSubjects(ctx context.Context) ([]U
 }
 
 func (company Company) LookupCreateOrderUserSubjects(ctx context.Context) ([]User, error) {
-  ids, err := authz.GetEngine(ctx).LookupSubjects(
+  ids, err := authz.GetEngine(ctx).LookupSubjects(ctx,
     authz.Resource{
       Type: TypeCompany,
       ID: authz.ID(company),

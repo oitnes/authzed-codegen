@@ -21,7 +21,7 @@ type Table authz.ID
 
 func (table Table) CreateOwnerRelations(ctx context.Context, objects TableOwnerObjects) error {
   if len(objects.Company) > 0 {
-    err := authz.GetEngine(ctx).CreateRelations(authz.Resource{
+    err := authz.GetEngine(ctx).CreateRelations(ctx, authz.Resource{
       Type: TypeTable,
       ID: authz.ID(table),
     }, authz.Relation(TableOwner), TypeCompany, authz.IDs(objects.Company))
@@ -34,7 +34,7 @@ func (table Table) CreateOwnerRelations(ctx context.Context, objects TableOwnerO
 
 func (table Table) DeleteOwnerRelations(ctx context.Context, objects TableOwnerObjects) error {
   if len(objects.Company) > 0 {
-    err := authz.GetEngine(ctx).DeleteRelations(authz.Resource{
+    err := authz.GetEngine(ctx).DeleteRelations(ctx, authz.Resource{
       Type: TypeTable,
       ID: authz.ID(table),
     }, authz.Relation(TableOwner), TypeCompany, authz.IDs(objects.Company))
@@ -46,7 +46,7 @@ func (table Table) DeleteOwnerRelations(ctx context.Context, objects TableOwnerO
 }
 
 func (table Table) ReadOwnerCompanyRelations(ctx context.Context) ([]Company, error) {
-  ids, err := authz.GetEngine(ctx).ReadRelations(authz.Resource{
+  ids, err := authz.GetEngine(ctx).ReadRelations(ctx, authz.Resource{
     Type: TypeTable,
     ID: authz.ID(table),
   }, authz.Relation(TableOwner), TypeCompany)
@@ -69,7 +69,7 @@ func (table Table) CheckWrite(ctx context.Context, input CheckTableWriteInputs) 
   }
 
   if len(input.User) > 0 {
-    err := authz.GetEngine(ctx).CheckPermission(authz.Resource{
+    err := authz.GetEngine(ctx).CheckPermission(ctx, authz.Resource{
       Type: TypeTable,
       ID: authz.ID(table),
     }, authz.Permission(TableWrite), TypeUser, authz.IDs(input.User))
@@ -83,7 +83,7 @@ func (table Table) CheckWrite(ctx context.Context, input CheckTableWriteInputs) 
 
 func LookupWriteTableResources(ctx context.Context, input CheckTableWriteInputs) ([]Table, error) {
   if len(input.User) > 0 {
-    ids, err := authz.GetEngine(ctx).LookupResources(
+    ids, err := authz.GetEngine(ctx).LookupResources(ctx,
       TypeTable, authz.Permission(TableWrite), 
       TypeUser, authz.IDs(input.User),
     )
@@ -98,7 +98,7 @@ func LookupWriteTableResources(ctx context.Context, input CheckTableWriteInputs)
 }
 
 func (table Table) LookupWriteUserSubjects(ctx context.Context) ([]User, error) {
-  ids, err := authz.GetEngine(ctx).LookupSubjects(
+  ids, err := authz.GetEngine(ctx).LookupSubjects(ctx,
     authz.Resource{
       Type: TypeTable,
       ID: authz.ID(table),
