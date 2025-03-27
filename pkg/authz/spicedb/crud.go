@@ -3,6 +3,7 @@ package spicedb
 import (
 	"context"
 	"errors"
+	"fmt"
 	"io"
 	"time"
 
@@ -14,6 +15,8 @@ import (
 
 type Engine struct {
 	client *authzed.Client
+
+	production bool
 
 	durationExpire time.Duration
 	token          string
@@ -33,7 +36,14 @@ func NewEngine(client *authzed.Client, durationExpireToken time.Duration) *Engin
 	}
 }
 
+func (e *Engine) debugLog(format string, args ...interface{}) {
+	if !e.production {
+		fmt.Printf("[DEBUG] "+format+"\n", args...)
+	}
+}
+
 func (e *Engine) setToken(token string) {
+	e.debugLog("Setting token: %s", token)
 	e.token = token
 	e.setTokenTime = time.Now().UnixNano()
 }
@@ -41,9 +51,11 @@ func (e *Engine) setToken(token string) {
 func (e *Engine) getConsistencySnapshot() *v1.Consistency {
 	now := time.Now().UnixNano()
 	if now-e.setTokenTime < e.durationExpire.Nanoseconds() {
+		e.debugLog("Using default consistency")
 		return nil
 	}
 
+	e.debugLog("Using consistency snapshot with token: %s", e.token)
 	return &v1.Consistency{
 		Requirement: &v1.Consistency_AtExactSnapshot{
 			AtExactSnapshot: &v1.ZedToken{
@@ -54,8 +66,10 @@ func (e *Engine) getConsistencySnapshot() *v1.Consistency {
 }
 
 func (e *Engine) CreateRelations(ctx context.Context, to authz.Resource, relation authz.Relation, subject authz.Type, ids []authz.ID) error {
+	e.debugLog("Creating relations: to=%v, relation=%v, subject=%v, ids=%v", to, relation, subject, ids)
 	updates := make([]*v1.RelationshipUpdate, 0, len(ids))
 	for _, id := range ids {
+		e.debugLog("Processing id: %v", id) // Added debug log
 		updates = append(updates, &v1.RelationshipUpdate{
 			Operation: v1.RelationshipUpdate_OPERATION_CREATE,
 			Relationship: &v1.Relationship{
@@ -87,8 +101,10 @@ func (e *Engine) CreateRelations(ctx context.Context, to authz.Resource, relatio
 }
 
 func (e *Engine) DeleteRelations(ctx context.Context, from authz.Resource, relation authz.Relation, subject authz.Type, ids []authz.ID) error {
+	e.debugLog("Deleting relations: from=%v, relation=%v, subject=%v, ids=%v", from, relation, subject, ids)
 	updates := make([]*v1.RelationshipUpdate, 0, len(ids))
 	for _, id := range ids {
+		e.debugLog("Processing id: %v", id) // Added debug log
 		updates = append(updates, &v1.RelationshipUpdate{
 			Operation: v1.RelationshipUpdate_OPERATION_DELETE,
 			Relationship: &v1.Relationship{
@@ -120,9 +136,11 @@ func (e *Engine) DeleteRelations(ctx context.Context, from authz.Resource, relat
 }
 
 func (e *Engine) CheckPermission(ctx context.Context, dest authz.Resource, has authz.Permission, subject authz.Type, audIDs []authz.ID) error {
+	e.debugLog("Checking permission: dest=%v, has=%v, subject=%v, audIDs=%v", dest, has, subject, audIDs)
 	consistency := e.getConsistencySnapshot()
 
 	for _, id := range audIDs {
+		e.debugLog("Processing id: %v", id) // Added debug log
 		err := errorIfDenied(e.client.CheckPermission(ctx, &v1.CheckPermissionRequest{
 			Consistency: consistency,
 			Resource: &v1.ObjectReference{
@@ -146,6 +164,7 @@ func (e *Engine) CheckPermission(ctx context.Context, dest authz.Resource, has a
 }
 
 func (e *Engine) LookupResources(ctx context.Context, from authz.Type, match authz.Permission, subject authz.Type, byIDs []authz.ID) ([]authz.ID, error) {
+	e.debugLog("Looking up resources: from=%v, match=%v, subject=%v, byIDs=%v", from, match, subject, byIDs)
 	consistency := e.getConsistencySnapshot()
 	ids := []authz.ID{}
 
@@ -168,6 +187,7 @@ func (e *Engine) LookupResources(ctx context.Context, from authz.Type, match aut
 
 		data, err := res.Recv()
 		for ; err == nil && data != nil; data, err = res.Recv() {
+			e.debugLog("Received data: %+v", data) // Added debug log
 			ids = append(ids, authz.ID(data.ResourceObjectId))
 		}
 
@@ -180,6 +200,7 @@ func (e *Engine) LookupResources(ctx context.Context, from authz.Type, match aut
 }
 
 func (e *Engine) LookupSubjects(ctx context.Context, on authz.Resource, permission authz.Permission, subject authz.Type) ([]authz.ID, error) {
+	e.debugLog("Looking up subjects: on=%v, permission=%v, subject=%v", on, permission, subject)
 	consistency := e.getConsistencySnapshot()
 	ids := []authz.ID{}
 
@@ -198,6 +219,7 @@ func (e *Engine) LookupSubjects(ctx context.Context, on authz.Resource, permissi
 
 	data, err := res.Recv()
 	for ; err == nil && data != nil; data, err = res.Recv() {
+		e.debugLog("Received data: %+v", data) // Added debug log
 		ids = append(ids, authz.ID(data.Subject.SubjectObjectId))
 	}
 	if !errors.Is(err, io.EOF) {
@@ -208,6 +230,7 @@ func (e *Engine) LookupSubjects(ctx context.Context, on authz.Resource, permissi
 }
 
 func (e *Engine) ReadRelations(ctx context.Context, from authz.Resource, relation authz.Relation, subject authz.Type) ([]authz.ID, error) {
+	e.debugLog("Reading relations: from=%v, relation=%v, subject=%v", from, relation, subject)
 	consistency := e.getConsistencySnapshot()
 	ids := []authz.ID{}
 
@@ -228,6 +251,7 @@ func (e *Engine) ReadRelations(ctx context.Context, from authz.Resource, relatio
 
 	data, err := res.Recv()
 	for ; err == nil && data != nil; data, err = res.Recv() {
+		e.debugLog("Received data: %+v", data) // Added debug log
 		ids = append(ids, authz.ID(data.Relationship.Subject.Object.ObjectId))
 	}
 	if !errors.Is(err, io.EOF) {
