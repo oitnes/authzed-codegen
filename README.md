@@ -87,11 +87,11 @@ authzed-codegen --output example/authzed example/schema.zed
 - Read relationships.
 - Lookup permissions and relationships.
 - Generate code for multiple languages (Go, ~~TypeScript, etc.~~).
+- SpiceDB engine client.
 
 ## TODOs
 
 - [ ] Support all schema features.
-- [ ] Implement SpiceDB engine client.
 
 
 ## Contributing
