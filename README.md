@@ -28,13 +28,13 @@ user := menusvc.User("user-id")
 
 order.CreateCreatorRelations(ctx, menusvc.OrderCreatorObjects{
   User: []menusvc.User{user},
-  // Company: []menusvc.Company{},
+  // Customer: []menusvc.Customer{},
 })
 
 order.
   CheckWrite(ctx, acl.CheckOrderWriteInputs{
     User: []menusvc.User{user},
-    // Customer: []menusvc.Customer{},
+    // Company: []menusvc.Company{},    
   })
 
 // ...
