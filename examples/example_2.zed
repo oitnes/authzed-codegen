@@ -1,0 +1,61 @@
+definition user {}
+
+// global platform definition
+definition platform {
+	relation administrator: user
+	relation registered_user: user
+	relation anonim_user: user:*
+
+	permission super_admin = administrator
+	permission create_forum = registered_user
+	permission subscribe_forums = registered_user
+	permission view = anonim_user + registered_user + administrator
+}
+
+definition public_forum {
+	relation global: platform
+
+	relation owner: user
+	relation admin: user
+	relation member: user
+
+	relation banned: user
+
+	permission own = owner
+	permission edit_admin_list = own + global->super_admin
+	permission delete = own +  global->super_admin
+	permission edit = owner + admin + global->super_admin
+	permission view = edit + member + global->view - banned
+	permission make_post = (owner + admin + member)  - banned
+}
+
+definition private_forum {
+	relation global: platform
+
+	relation owner: user
+	relation admin: user
+	relation member: user
+	relation aplicant: user
+	relation invited_candidate: user
+
+	relation banned: user
+	relation signed_tos: user // user that agreed with terms of service of this forum
+
+	permission own = owner
+	permission edit_admin_list = own + global->super_admin
+	permission delete = own + global->super_admin
+	permission apply = global->subscribe_forums - banned
+	permission edit = owner + admin + global->super_admin
+	permission make_post = owner + (((admin + member) & signed_tos) - banned)
+	permission view = make_post + invited_candidate + aplicant + global->super_admin
+}
+
+definition post {
+	relation location: private_forum | public_forum
+
+	relation author: user
+
+	permission edit = author + location->edit
+	permission view = edit + location->view
+	permission delete = edit
+}

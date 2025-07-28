@@ -7,7 +7,7 @@ import (
 	"io"
 	"time"
 
-	"github.com/danhtran94/authzed-codegen/pkg/authz"
+	"github.com/oitnes/authzed-codegen/pkg/authz"
 
 	v1 "github.com/authzed/authzed-go/proto/authzed/api/v1"
 	"github.com/authzed/authzed-go/v1"

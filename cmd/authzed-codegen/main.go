@@ -5,45 +5,75 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/danhtran94/authzed-codegen/internal/ast"
-	"github.com/danhtran94/authzed-codegen/internal/generator"
-	"github.com/danhtran94/authzed-codegen/internal/templates"
+	"github.com/oitnes/authzed-codegen/internal/generator"
 )
 
-var outputPath string
-
-func init() {
-	flag.StringVar(&outputPath, "output", "zed", "output path for generated files")
-
-}
+// Version information (set during build)
+var (
+	version = "dev"
+	commit  = "unknown"
+	date    = "unknown"
+)
 
 func main() {
-	if len(os.Args) < 2 {
-		panic(fmt.Errorf("missing schema path"))
+	var (
+		outputPath  string
+		schemePath  string
+		showVersion bool
+		showHelp    bool
+	)
+
+	flag.StringVar(&outputPath, "output", "", "output path for generated files")
+	flag.StringVar(&schemePath, "schema", "", "input zed schema file path")
+	flag.BoolVar(&showVersion, "version", false, "show version information")
+	flag.BoolVar(&showVersion, "v", false, "show version information (short)")
+	flag.BoolVar(&showHelp, "help", false, "show help message")
+	flag.BoolVar(&showHelp, "h", false, "show help message (short)")
+
+	flag.Usage = func() {
+		fmt.Fprintf(os.Stderr, "authzed-codegen - Type-safe Go code generator for SpiceDB schemas\n\n")
+		fmt.Fprintf(os.Stderr, "Usage: %s [options]\n\n", os.Args[0])
+		fmt.Fprintf(os.Stderr, "Options:\n")
+		flag.PrintDefaults()
+		fmt.Fprintf(os.Stderr, "\nExamples:\n")
+		fmt.Fprintf(os.Stderr, "  %s --schema schema.zed --output ./generated\n", os.Args[0])
+		fmt.Fprintf(os.Stderr, "  %s -schema examples/example_1.zed -output ./output\n", os.Args[0])
+		fmt.Fprintf(os.Stderr, "\nFor more information, visit: https://github.com/oitnes/authzed-codegen\n")
 	}
 
 	flag.Parse()
 
-	schemePath := os.Args[len(os.Args)-1]
+	if showVersion {
+		fmt.Printf("authzed-codegen %s\n", version)
+		fmt.Printf("  commit: %s\n", commit)
+		fmt.Printf("  built:  %s\n", date)
+		os.Exit(0)
+	}
+
+	if showHelp {
+		flag.Usage()
+		os.Exit(0)
+	}
+
+	if schemePath == "" {
+		fmt.Print("missing schema path")
+		os.Exit(1)
+	}
+
+	if outputPath == "" {
+		fmt.Print("missing output path")
+		os.Exit(1)
+	}
 
 	input, err := os.ReadFile(schemePath)
 	if err != nil {
-		panic(err)
+		fmt.Printf("error during reading schema file: %e", err)
+		os.Exit(1)
 	}
 
-	lex := ast.NewLexer(string(input))
-	parser := ast.NewParser(lex.Lex())
-	ast, err := parser.ParseDefinitions()
+	err = generator.GenerateCodeFromString(string(input), outputPath)
 	if err != nil {
-		panic(err)
-	}
-
-	g := generator.NewGenerator(ast)
-	g.OutputPath = outputPath
-	g.AddObjectTemplate("[object]", string(templates.ObjectTemplate))
-
-	err = g.GenerateObjectSource("[object]")
-	if err != nil {
-		panic(err)
+		fmt.Printf("error code generation: %e", err)
+		os.Exit(1)
 	}
 }
