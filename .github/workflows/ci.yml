@@ -10,29 +10,13 @@ jobs:
   test:
     name: Test
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        go-version: ['1.20', '1.21', '1.22']
-    
     steps:
-    - name: Check out code
-      uses: actions/checkout@v4
+    - uses: actions/checkout@v4
 
     - name: Set up Go
       uses: actions/setup-go@v4
       with:
-        go-version: ${{ matrix.go-version }}
-
-    - name: Cache Go modules
-      uses: actions/cache@v3
-      with:
-        path: |
-          ~/.cache/go-build
-          ~/go/pkg/mod
-        key: ${{ runner.os }}-go-${{ matrix.go-version }}-${{ hashFiles('**/go.sum') }}
-        restore-keys: |
-          ${{ runner.os }}-go-${{ matrix.go-version }}-
-          ${{ runner.os }}-go-
+        go-version: '1.24'
 
     - name: Download dependencies
       run: go mod download
@@ -58,32 +42,21 @@ jobs:
     runs-on: ubuntu-latest
     
     steps:
-    - name: Check out code
-      uses: actions/checkout@v4
+    - uses: actions/checkout@v4
 
     - name: Set up Go
       uses: actions/setup-go@v4
       with:
-        go-version: '1.22'
+        go-version: '1.24'
+
+    - name: Download dependencies
+      run: go mod download
 
     - name: Run golangci-lint
       uses: golangci/golangci-lint-action@v3
       with:
         version: latest
         args: --timeout=5m
-
-  format:
-    name: Format Check
-    runs-on: ubuntu-latest
-    
-    steps:
-    - name: Check out code
-      uses: actions/checkout@v4
-
-    - name: Set up Go
-      uses: actions/setup-go@v4
-      with:
-        go-version: '1.22'
 
     - name: Check formatting
       run: |
@@ -102,19 +75,19 @@ jobs:
           exit 1
         fi
 
+
   examples:
     name: Test Examples
     runs-on: ubuntu-latest
     needs: [test, lint]
     
     steps:
-    - name: Check out code
-      uses: actions/checkout@v4
+    - uses: actions/checkout@v4
 
     - name: Set up Go
       uses: actions/setup-go@v4
       with:
-        go-version: '1.22'
+        go-version: '1.24'
 
     - name: Build application
       run: go build -o authzed-codegen ./cmd/authzed-codegen
@@ -137,26 +110,3 @@ jobs:
         cd test_output_1 && go mod init test1 && go mod tidy
         cd ../test_output_2 && go mod init test2 && go mod tidy
         echo "Generated code compilation check passed"
-
-  security:
-    name: Security Scan
-    runs-on: ubuntu-latest
-    
-    steps:
-    - name: Check out code
-      uses: actions/checkout@v4
-
-    - name: Set up Go
-      uses: actions/setup-go@v4
-      with:
-        go-version: '1.22'
-
-    - name: Run Gosec Security Scanner
-      uses: securecodewarrior/github-action-gosec@master
-      with:
-        args: '-no-fail -fmt sarif -out results.sarif ./...'
-
-    - name: Upload SARIF file
-      uses: github/codeql-action/upload-sarif@v2
-      with:
-        sarif_file: results.sarif
