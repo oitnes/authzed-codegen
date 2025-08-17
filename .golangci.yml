@@ -7,16 +7,12 @@ linters:
     - gofmt
     - goimports
     - govet
-    - golint
     - ineffassign
     - misspell
     - staticcheck
     - unused
     - errcheck
     - gosimple
-    - deadcode
-    - varcheck
-    - structcheck
     - typecheck
     - gocyclo
     - gosec
@@ -24,9 +20,8 @@ linters:
     - gocritic
     - gofumpt
     - revive
-    - exportloopref
+    - copyloopvar
     - gomodguard
-    - depguard
 
 linters-settings:
   gocyclo:
@@ -81,6 +76,7 @@ issues:
   max-same-issues: 0
 
 output:
-  format: colored-line-number
+  formats:
+    - format: colored-line-number
   print-issued-lines: true
   print-linter-name: true

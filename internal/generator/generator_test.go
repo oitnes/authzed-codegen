@@ -6,7 +6,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/oitnes/authzed-codegen/internal/generator/zed_lexer"
+	zedlexer "github.com/oitnes/authzed-codegen/internal/generator/zed_lexer"
 )
 
 func TestUpperFirst(t *testing.T) {
@@ -118,12 +118,12 @@ func TestNewParser(t *testing.T) {
 }
 
 func TestFilterComments(t *testing.T) {
-	tokens := []zed_lexer.Token{
-		{Type: zed_lexer.DEFINITION, Literal: "definition"},
-		{Type: zed_lexer.COMMENT, Literal: "// comment"},
-		{Type: zed_lexer.IDENTIFIER, Literal: "user"},
-		{Type: zed_lexer.COMMENT, Literal: "/* block comment */"},
-		{Type: zed_lexer.LBRACE, Literal: "{"},
+	tokens := []zedlexer.Token{
+		{Type: zedlexer.DEFINITION, Literal: "definition"},
+		{Type: zedlexer.COMMENT, Literal: "// comment"},
+		{Type: zedlexer.IDENTIFIER, Literal: "user"},
+		{Type: zedlexer.COMMENT, Literal: "/* block comment */"},
+		{Type: zedlexer.LBRACE, Literal: "{"},
 	}
 
 	filtered := filterComments(tokens)
@@ -134,7 +134,7 @@ func TestFilterComments(t *testing.T) {
 	}
 
 	for _, token := range filtered {
-		if token.Type == zed_lexer.COMMENT {
+		if token.Type == zedlexer.COMMENT {
 			t.Error("filterComments should remove all comment tokens")
 		}
 	}
@@ -144,7 +144,6 @@ func TestParseSimpleDefinition(t *testing.T) {
 	input := "definition user {}"
 	parser := NewParser(input)
 	definitions, err := parser.ParseDefinitions()
-
 	if err != nil {
 		t.Fatalf("ParseDefinitions failed: %v", err)
 	}
@@ -173,7 +172,6 @@ func TestParseDefinitionWithRelation(t *testing.T) {
 	}`
 	parser := NewParser(input)
 	definitions, err := parser.ParseDefinitions()
-
 	if err != nil {
 		t.Fatalf("ParseDefinitions failed: %v", err)
 	}
@@ -208,7 +206,6 @@ func TestParseDefinitionWithPermission(t *testing.T) {
 	}`
 	parser := NewParser(input)
 	definitions, err := parser.ParseDefinitions()
-
 	if err != nil {
 		t.Fatalf("ParseDefinitions failed: %v", err)
 	}
@@ -237,7 +234,6 @@ func TestParseComplexPermissionExpression(t *testing.T) {
 	}`
 	parser := NewParser(input)
 	definitions, err := parser.ParseDefinitions()
-
 	if err != nil {
 		t.Fatalf("ParseDefinitions failed: %v", err)
 	}
@@ -257,7 +253,6 @@ func TestParsePermissionWithArrow(t *testing.T) {
 	}`
 	parser := NewParser(input)
 	definitions, err := parser.ParseDefinitions()
-
 	if err != nil {
 		t.Fatalf("ParseDefinitions failed: %v", err)
 	}
@@ -280,7 +275,6 @@ func TestParsePermissionWithParentheses(t *testing.T) {
 	}`
 	parser := NewParser(input)
 	definitions, err := parser.ParseDefinitions()
-
 	if err != nil {
 		t.Fatalf("ParseDefinitions failed: %v", err)
 	}
@@ -300,7 +294,6 @@ func TestParseRelationWithUnion(t *testing.T) {
 	}`
 	parser := NewParser(input)
 	definitions, err := parser.ParseDefinitions()
-
 	if err != nil {
 		t.Fatalf("ParseDefinitions failed: %v", err)
 	}
@@ -438,7 +431,6 @@ func TestParseDefinitionWithPrefixes(t *testing.T) {
 	input := `definition namespace/platform/user {}`
 	parser := NewParser(input)
 	definitions, err := parser.ParseDefinitions()
-
 	if err != nil {
 		t.Fatalf("ParseDefinitions failed: %v", err)
 	}

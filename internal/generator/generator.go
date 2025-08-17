@@ -4,10 +4,11 @@ import (
 	"bytes"
 	_ "embed"
 	"fmt"
-	"github.com/oitnes/authzed-codegen/internal/generator/zed_lexer"
 	"os"
 	"strings"
 	"text/template"
+
+	zedlexer "github.com/oitnes/authzed-codegen/internal/generator/zed_lexer"
 )
 
 //go:embed object.go.tmpl
@@ -120,11 +121,13 @@ type Relation struct {
 	Value string
 }
 
-type Permissions []Permission
-type PermissionsByNames map[string]Permissions
-type Relations []Relation
-type RelationsByNames map[string]Relations
-type DefinitionsByTypes map[string]*ProcessedDefinition
+type (
+	Permissions        []Permission
+	PermissionsByNames map[string]Permissions
+	Relations          []Relation
+	RelationsByNames   map[string]Relations
+	DefinitionsByTypes map[string]*ProcessedDefinition
+)
 
 type ProcessedDefinition struct {
 	Type        string
@@ -164,19 +167,19 @@ type Parser interface {
 }
 
 type parser struct {
-	tokens  []zed_lexer.Token
+	tokens  []zedlexer.Token
 	current int
 }
 
 // NewParser creates a new parser from input string
 func NewParser(input string) Parser {
-	lexer := &zed_lexer.Lexer{InputCode: input}
+	lexer := &zedlexer.Lexer{InputCode: input}
 	return &parser{tokens: filterComments(lexer.Lex())}
 }
 
-func filterComments(inputTokens []zed_lexer.Token) (outputTokens []zed_lexer.Token) {
+func filterComments(inputTokens []zedlexer.Token) (outputTokens []zedlexer.Token) {
 	for _, t := range inputTokens {
-		if t.Type == zed_lexer.COMMENT {
+		if t.Type == zedlexer.COMMENT {
 			continue
 		}
 		outputTokens = append(outputTokens, t)
@@ -185,7 +188,7 @@ func filterComments(inputTokens []zed_lexer.Token) (outputTokens []zed_lexer.Tok
 }
 
 // GenerateCodeFromString parses input string and generates code
-func GenerateCodeFromString(input string, outputFolderPath string) error {
+func GenerateCodeFromString(input, outputFolderPath string) error {
 	parser := NewParser(input)
 	definitions, err := parser.ParseDefinitions()
 	if err != nil {
@@ -206,9 +209,7 @@ func GenerateCodeTo(definitions []Definition, outputFolderPath string) error {
 		"snakeToPascal":           SnakeToPascal,
 		"typeName":                TypeName,
 		"typeNameWithUnderscores": TypeNameWithUnderscores,
-		"relationExpressionTypes": func(expr Expression) []string {
-			return flattenRelationExpressionTypeStrings(expr)
-		},
+		"relationExpressionTypes": flattenRelationExpressionTypeStrings,
 		"permissionInputTypes": func(objectType string, perm string) []string {
 			treeName := fmt.Sprintf("%s/%s", objectType, perm)
 			if types, ok := permissionsTree[treeName]; ok {
@@ -248,7 +249,7 @@ func GenerateCodeTo(definitions []Definition, outputFolderPath string) error {
 		}
 
 		filePath := fmt.Sprintf("%s/%s_gen.go", path, PackageName(def.Name))
-		if err = os.WriteFile(filePath, buf.Bytes(), os.ModePerm); err != nil {
+		if err := os.WriteFile(filePath, buf.Bytes(), 0o600); err != nil {
 			return err
 		}
 	}
@@ -257,7 +258,7 @@ func GenerateCodeTo(definitions []Definition, outputFolderPath string) error {
 }
 
 func UpperFirst(s string) string {
-	if len(s) == 0 {
+	if s == "" {
 		return s
 	}
 
@@ -323,7 +324,7 @@ func (p *parser) ParseDefinitions() ([]Definition, error) {
 
 	// Check for illegal tokens
 	for _, t := range p.tokens {
-		if t.Type == zed_lexer.ILLEGAL {
+		if t.Type == zedlexer.ILLEGAL {
 			return definitions, fmt.Errorf("found illegal token at line: %d, column: %d", t.Line, t.Column)
 		}
 	}
@@ -342,12 +343,12 @@ func (p *parser) ParseDefinitions() ([]Definition, error) {
 func (p *parser) parseDefinition() (Definition, error) {
 	var def Definition
 
-	if !p.tryConsume(zed_lexer.DEFINITION) {
+	if !p.tryConsume(zedlexer.DEFINITION) {
 		return def, p.error("expected definition")
 	}
 
 	identifier := p.peek()
-	if identifier.Type != zed_lexer.IDENTIFIER {
+	if identifier.Type != zedlexer.IDENTIFIER {
 		return def, p.error("expected identifier")
 	}
 	p.advance()
@@ -363,12 +364,12 @@ func (p *parser) parseDefinition() (Definition, error) {
 	}
 	def.ObjectType = def.GetObjectType()
 
-	if !p.tryConsume(zed_lexer.LBRACE) {
+	if !p.tryConsume(zedlexer.LBRACE) {
 		return def, p.error("expected left brace")
 	}
 
-	for p.peek().Type == zed_lexer.RELATION || p.peek().Type == zed_lexer.PERMISSION {
-		if p.peek().Type == zed_lexer.RELATION {
+	for p.peek().Type == zedlexer.RELATION || p.peek().Type == zedlexer.PERMISSION {
+		if p.peek().Type == zedlexer.RELATION {
 			rel, err := p.parseRelation()
 			if err != nil {
 				return def, err
@@ -383,7 +384,7 @@ func (p *parser) parseDefinition() (Definition, error) {
 		}
 	}
 
-	if !p.tryConsume(zed_lexer.RBRACE) {
+	if !p.tryConsume(zedlexer.RBRACE) {
 		return def, p.error("expected right brace")
 	}
 
@@ -393,18 +394,18 @@ func (p *parser) parseDefinition() (Definition, error) {
 func (p *parser) parseRelation() (RelationNode, error) {
 	var rel RelationNode
 
-	if !p.tryConsume(zed_lexer.RELATION) {
+	if !p.tryConsume(zedlexer.RELATION) {
 		return rel, p.error("expected relation")
 	}
 
 	identifier := p.peek()
-	if identifier.Type != zed_lexer.IDENTIFIER {
+	if identifier.Type != zedlexer.IDENTIFIER {
 		return rel, p.error("expected relation identifier")
 	}
 	p.advance()
 	rel.Name = identifier.Literal
 
-	if !p.tryConsume(zed_lexer.COLON) {
+	if !p.tryConsume(zedlexer.COLON) {
 		return rel, p.error("expected colon")
 	}
 
@@ -423,7 +424,7 @@ func (p *parser) parseRelationExpression() (Expression, error) {
 		return nil, err
 	}
 
-	for p.peek().Type == zed_lexer.OR {
+	for p.peek().Type == zedlexer.OR {
 		p.advance() // consume |
 		right, err := p.parseSingleRelation()
 		if err != nil {
@@ -433,7 +434,7 @@ func (p *parser) parseRelationExpression() (Expression, error) {
 	}
 
 	// Handle wildcard
-	if p.peek().Type == zed_lexer.WILDCARD {
+	if p.peek().Type == zedlexer.WILDCARD {
 		p.advance()
 	}
 
@@ -442,7 +443,7 @@ func (p *parser) parseRelationExpression() (Expression, error) {
 
 func (p *parser) parseSingleRelation() (Expression, error) {
 	identifier := p.peek()
-	if identifier.Type != zed_lexer.IDENTIFIER {
+	if identifier.Type != zedlexer.IDENTIFIER {
 		return nil, p.error("expected relation identifier")
 	}
 	p.advance()
@@ -453,18 +454,18 @@ func (p *parser) parseSingleRelation() (Expression, error) {
 func (p *parser) parsePermission() (PermissionNode, error) {
 	var perm PermissionNode
 
-	if !p.tryConsume(zed_lexer.PERMISSION) {
+	if !p.tryConsume(zedlexer.PERMISSION) {
 		return perm, p.error("expected permission")
 	}
 
 	identifier := p.peek()
-	if identifier.Type != zed_lexer.IDENTIFIER {
+	if identifier.Type != zedlexer.IDENTIFIER {
 		return perm, p.error("expected permission identifier")
 	}
 	p.advance()
 	perm.Name = identifier.Literal
 
-	if !p.tryConsume(zed_lexer.EQUAL) {
+	if !p.tryConsume(zedlexer.EQUAL) {
 		return perm, p.error("expected equal")
 	}
 
@@ -487,7 +488,7 @@ func (p *parser) parseAdditiveExpression() (Expression, error) {
 		return nil, err
 	}
 
-	for p.peek().Type == zed_lexer.PLUS || p.peek().Type == zed_lexer.MINUS {
+	for p.peek().Type == zedlexer.PLUS || p.peek().Type == zedlexer.MINUS {
 		op := p.peek().Literal
 		p.advance()
 		right, err := p.parseMultiplicativeExpression()
@@ -506,7 +507,7 @@ func (p *parser) parseMultiplicativeExpression() (Expression, error) {
 		return nil, err
 	}
 
-	for p.peek().Type == zed_lexer.AND {
+	for p.peek().Type == zedlexer.AND {
 		op := p.peek().Literal
 		p.advance()
 		right, err := p.parsePrimaryExpression()
@@ -520,14 +521,14 @@ func (p *parser) parseMultiplicativeExpression() (Expression, error) {
 }
 
 func (p *parser) parsePrimaryExpression() (Expression, error) {
-	if p.peek().Type == zed_lexer.LBRACKETS {
+	if p.peek().Type == zedlexer.LBRACKETS {
 		return p.parseParenthesizedExpression()
 	}
 	return p.parseIdentifierChain()
 }
 
 func (p *parser) parseParenthesizedExpression() (Expression, error) {
-	if !p.tryConsume(zed_lexer.LBRACKETS) {
+	if !p.tryConsume(zedlexer.LBRACKETS) {
 		return nil, p.error("expected left parenthesis")
 	}
 
@@ -536,7 +537,7 @@ func (p *parser) parseParenthesizedExpression() (Expression, error) {
 		return nil, err
 	}
 
-	if !p.tryConsume(zed_lexer.RBRACKETS) {
+	if !p.tryConsume(zedlexer.RBRACKETS) {
 		return nil, p.error("expected right parenthesis")
 	}
 
@@ -545,18 +546,18 @@ func (p *parser) parseParenthesizedExpression() (Expression, error) {
 
 func (p *parser) parseIdentifierChain() (Expression, error) {
 	identifier := p.peek()
-	if identifier.Type != zed_lexer.IDENTIFIER {
+	if identifier.Type != zedlexer.IDENTIFIER {
 		return nil, p.error("expected identifier")
 	}
 	p.advance()
 
 	var left Expression = &IdentifierNode{Value: identifier.Literal}
 
-	for p.peek().Type == zed_lexer.ARROW {
+	for p.peek().Type == zedlexer.ARROW {
 		op := p.peek().Literal
 		p.advance()
 		right := p.peek()
-		if right.Type != zed_lexer.IDENTIFIER {
+		if right.Type != zedlexer.IDENTIFIER {
 			return nil, p.error("expected identifier after arrow")
 		}
 		p.advance()
@@ -567,7 +568,7 @@ func (p *parser) parseIdentifierChain() (Expression, error) {
 }
 
 // Helper methods
-func (p *parser) tryConsume(expected zed_lexer.TokenType) bool {
+func (p *parser) tryConsume(expected zedlexer.TokenType) bool {
 	if p.peek().Type == expected {
 		p.advance()
 		return true
@@ -580,12 +581,12 @@ func (p *parser) advance() {
 }
 
 func (p *parser) haveNext() bool {
-	return p.current < len(p.tokens) && p.peek().Type != zed_lexer.EOF
+	return p.current < len(p.tokens) && p.peek().Type != zedlexer.EOF
 }
 
-func (p *parser) peek() zed_lexer.Token {
+func (p *parser) peek() zedlexer.Token {
 	if p.current >= len(p.tokens) {
-		return zed_lexer.Token{Type: zed_lexer.EOF}
+		return zedlexer.Token{Type: zedlexer.EOF}
 	}
 	return p.tokens[p.current]
 }

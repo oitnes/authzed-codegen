@@ -1,4 +1,4 @@
-package zed_lexer
+package zedlexer
 
 import (
 	"unicode"
@@ -87,16 +87,7 @@ func (l *Lexer) readToken() Token {
 
 	switch char {
 	case slash:
-		if l.peekForward() == slash {
-			l.skipLineComment()
-			return Token{COMMENT, "//", line, column}
-		} else if l.peekForward() == star {
-			l.skipComplexComment()
-			return Token{COMMENT, "/*", line, column}
-		} else {
-			l.skip()
-			return Token{ILLEGAL, "/", line, column}
-		}
+		return l.handleSlash(line, column)
 	case '{':
 		l.skip()
 		return Token{LBRACE, "{", line, column}
@@ -110,13 +101,7 @@ func (l *Lexer) readToken() Token {
 		l.skip()
 		return Token{RBRACKETS, ")", line, column}
 	case ':':
-		if l.peekForward() == star {
-			l.skipComplicatedSymbol(":*")
-			return Token{WILDCARD, ":*", line, column}
-		} else {
-			l.skip()
-			return Token{COLON, ":", line, column}
-		}
+		return l.handleColon(line, column)
 	case '|':
 		l.skip()
 		return Token{OR, "|", line, column}
@@ -130,34 +115,9 @@ func (l *Lexer) readToken() Token {
 		l.skip()
 		return Token{EQUAL, "=", line, column}
 	case '-':
-		if l.peekForward() == '>' {
-			l.skipComplicatedSymbol("->")
-			return Token{ARROW, "->", line, column}
-		} else {
-			l.skip()
-			return Token{MINUS, string(char), line, column}
-		}
+		return l.handleMinus(char, line, column)
 	default:
-		if l.isIdentifierPart(char) {
-			literal := l.readIdentifier()
-			tokenType := IDENTIFIER
-
-			switch literal {
-			case "caveat":
-				tokenType = CAVEAT
-			case "definition":
-				tokenType = DEFINITION
-			case "relation":
-				tokenType = RELATION
-			case "permission":
-				tokenType = PERMISSION
-			}
-
-			return Token{tokenType, literal, line, column}
-		} else {
-			l.skip()
-			return Token{ILLEGAL, string(char), line, column}
-		}
+		return l.handleDefault(char, line, column)
 	}
 }
 
@@ -243,4 +203,64 @@ func (l *Lexer) haveNext() bool {
 // haveNextN return true if n symbol (include current pos) exists in InputCode
 func (l *Lexer) haveNextN(n int) bool {
 	return l.pos+n <= len(l.InputCode)
+}
+
+// handleSlash handles slash characters for comments
+func (l *Lexer) handleSlash(line, column int) Token {
+	if l.peekForward() == slash {
+		l.skipLineComment()
+		return Token{COMMENT, "//", line, column}
+	} else if l.peekForward() == star {
+		l.skipComplexComment()
+		return Token{COMMENT, "/*", line, column}
+	} else {
+		l.skip()
+		return Token{ILLEGAL, "/", line, column}
+	}
+}
+
+// handleColon handles colon and wildcard tokens
+func (l *Lexer) handleColon(line, column int) Token {
+	if l.peekForward() == star {
+		l.skipComplicatedSymbol(":*")
+		return Token{WILDCARD, ":*", line, column}
+	} else {
+		l.skip()
+		return Token{COLON, ":", line, column}
+	}
+}
+
+// handleMinus handles minus and arrow tokens
+func (l *Lexer) handleMinus(char rune, line, column int) Token {
+	if l.peekForward() == '>' {
+		l.skipComplicatedSymbol("->")
+		return Token{ARROW, "->", line, column}
+	} else {
+		l.skip()
+		return Token{MINUS, string(char), line, column}
+	}
+}
+
+// handleDefault handles identifiers and illegal characters
+func (l *Lexer) handleDefault(char rune, line, column int) Token {
+	if l.isIdentifierPart(char) {
+		literal := l.readIdentifier()
+		tokenType := IDENTIFIER
+
+		switch literal {
+		case "caveat":
+			tokenType = CAVEAT
+		case "definition":
+			tokenType = DEFINITION
+		case "relation":
+			tokenType = RELATION
+		case "permission":
+			tokenType = PERMISSION
+		}
+
+		return Token{tokenType, literal, line, column}
+	} else {
+		l.skip()
+		return Token{ILLEGAL, string(char), line, column}
+	}
 }

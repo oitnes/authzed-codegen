@@ -1,4 +1,4 @@
-package zed_lexer
+package zedlexer
 
 import (
 	"reflect"

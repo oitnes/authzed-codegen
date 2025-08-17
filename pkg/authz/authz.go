@@ -5,8 +5,10 @@ import (
 	"fmt"
 )
 
-var ErrNoInput = fmt.Errorf("no input")
-var ErrPermissionDenied = fmt.Errorf("permission denied")
+var (
+	ErrNoInput          = fmt.Errorf("no input")
+	ErrPermissionDenied = fmt.Errorf("permission denied")
+)
 
 type Engine interface {
 	CreateRelations(ctx context.Context, to Resource, relation Relation, subject Type, ids []ID) error
@@ -81,8 +83,4 @@ func Stringers[T ~string](ids []StringConvertable) []T {
 	}
 
 	return result
-}
-
-func permStrACL(perm Permission, obj Type, objID ID, sub Type, subID ID) string {
-	return fmt.Sprintf("<%s:%s#%s@%s:%s>", obj, objID, string(perm), sub, subID)
 }

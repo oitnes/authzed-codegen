@@ -184,7 +184,6 @@ func (e *Engine) LookupResources(ctx context.Context, from authz.Type, match aut
 				},
 			},
 		})
-
 		if err != nil {
 			return nil, err
 		}
