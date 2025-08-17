@@ -28,7 +28,7 @@ linters:
 linters-settings:
   gocyclo:
     min-complexity: 15
-  
+
   gocritic:
     enabled-tags:
       - diagnostic
@@ -41,7 +41,7 @@ linters-settings:
       - ifElseChain
       - octalLiteral
       - whyNoLint
-  
+
   revive:
     rules:
       - name: exported
@@ -54,7 +54,7 @@ linters-settings:
         arguments: [5]
       - name: cyclomatic
         arguments: [15]
-  
+
   gosec:
     excludes:
       - G204 # Command execution with variable input
@@ -73,12 +73,13 @@ issues:
     - source: "^//go:embed"
       linters:
         - misspell
-  
+
   max-issues-per-linter: 0
   max-same-issues: 0
 
 output:
   formats:
-    colored-line-number: stdout
+    - format: colored-line-number
+      path: stdout
   print-issued-lines: true
   print-linter-name: true
