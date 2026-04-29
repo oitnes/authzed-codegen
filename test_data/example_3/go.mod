@@ -1,19 +1,16 @@
-module github.com/oitnes/authzed-codegen
+module example_3
 
 go 1.24.0
 
 toolchain go1.24.5
 
-require (
-	github.com/authzed/authzed-go v1.8.0
-	github.com/authzed/grpcutil v0.0.0-20250221190651-1985b19b35b8
-	github.com/dave/jennifer v1.7.1
-	google.golang.org/grpc v1.78.0
-)
+require github.com/oitnes/authzed-codegen v0.0.0
 
 require (
 	buf.build/gen/go/bufbuild/protovalidate/protocolbuffers/go v1.36.11-20251209175733-2a1774d88802.1 // indirect
 	cloud.google.com/go/compute/metadata v0.9.0 // indirect
+	github.com/authzed/authzed-go v1.8.0 // indirect
+	github.com/authzed/grpcutil v0.0.0-20250221190651-1985b19b35b8 // indirect
 	github.com/cenkalti/backoff/v4 v4.3.0 // indirect
 	github.com/certifi/gocertifi v0.0.0-20210507211836-431795d63e8d // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
@@ -29,6 +26,10 @@ require (
 	golang.org/x/text v0.33.0 // indirect
 	google.golang.org/genproto/googleapis/api v0.0.0-20260128011058-8636f8732409 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20260128011058-8636f8732409 // indirect
+	google.golang.org/grpc v1.78.0 // indirect
 	google.golang.org/protobuf v1.36.11 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
+
+// to test current code version
+replace github.com/oitnes/authzed-codegen => ../../

@@ -1,0 +1,15 @@
+definition user {}
+
+definition organization {
+	relation member: user
+}
+
+definition entitlement {
+	relation org: organization
+	permission subscribed_member = org->member
+}
+
+definition feature {
+	relation associated_entitlement: entitlement
+	permission access = associated_entitlement->subscribed_member
+}

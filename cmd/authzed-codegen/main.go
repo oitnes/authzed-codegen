@@ -4,46 +4,44 @@ import (
 	"flag"
 	"fmt"
 	"os"
+	"path/filepath"
 
-	"github.com/danhtran94/authzed-codegen/internal/ast"
-	"github.com/danhtran94/authzed-codegen/internal/generator"
-	"github.com/danhtran94/authzed-codegen/internal/templates"
+	"github.com/oitnes/authzed-codegen/internal/generator"
 )
 
-var outputPath string
-
-func init() {
-	flag.StringVar(&outputPath, "output", "zed", "output path for generated files")
-
-}
-
 func main() {
-	if len(os.Args) < 2 {
-		panic(fmt.Errorf("missing schema path"))
+	var cfg generator.Config
+
+	flag.StringVar(&cfg.SchemaPath, "schema", "", "path to .zed schema file (required)")
+	flag.StringVar(&cfg.OutputPath, "output", "", "output directory for generated Go files (required)")
+	flag.StringVar(&cfg.PackageName, "package", "", "package name for generated code (defaults to output directory name)")
+	flag.BoolVar(&cfg.WithRepository, "with-repository", false, "generate entity CRUD methods")
+	flag.BoolVar(&cfg.CleanPackage, "clean-package", false, "remove output directory before generating code")
+
+	flag.Usage = func() {
+		fmt.Fprintf(os.Stderr, "authzed-codegen - Type-safe Go code generator for SpiceDB schemas\n\n")
+		fmt.Fprintf(os.Stderr, "Usage:\n  %s [options]\n\n", os.Args[0])
+		fmt.Fprintf(os.Stderr, "Options:\n")
+		flag.PrintDefaults()
+		fmt.Fprintf(os.Stderr, "\nExamples:\n")
+		fmt.Fprintf(os.Stderr, "  %s --schema schema.zed --output ./permissions\n", os.Args[0])
+		fmt.Fprintf(os.Stderr, "  %s --schema schema.zed --output ./permissions --with-repository\n", os.Args[0])
 	}
 
 	flag.Parse()
 
-	schemePath := os.Args[len(os.Args)-1]
-
-	input, err := os.ReadFile(schemePath)
-	if err != nil {
-		panic(err)
+	if cfg.SchemaPath == "" || cfg.OutputPath == "" {
+		fmt.Fprintln(os.Stderr, "error: --schema and --output are required")
+		flag.Usage()
+		os.Exit(1)
 	}
 
-	lex := ast.NewLexer(string(input))
-	parser := ast.NewParser(lex.Lex())
-	ast, err := parser.ParseDefinitions()
-	if err != nil {
-		panic(err)
+	if cfg.PackageName == "" {
+		cfg.PackageName = filepath.Base(cfg.OutputPath)
 	}
 
-	g := generator.NewGenerator(ast)
-	g.OutputPath = outputPath
-	g.AddObjectTemplate("[object]", string(templates.ObjectTemplate))
-
-	err = g.GenerateObjectSource("[object]")
-	if err != nil {
-		panic(err)
+	if err := generator.Generate(cfg); err != nil {
+		fmt.Fprintf(os.Stderr, "error: %v\n", err)
+		os.Exit(1)
 	}
 }

@@ -1,0 +1,161 @@
+name: Regular CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+permissions:
+  contents: read
+  issues: write
+  pull-requests: write
+
+env:
+  GO_VERSION: "1.24"
+
+jobs:
+  unit-test:
+    name: Unit testing
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: ${{ env.GO_VERSION }}
+
+      - name: Download dependencies
+        run: go mod download
+
+      - name: Run unit tests of internal package
+        run: go test -v -race -coverprofile=coverage.out ./internal/...
+
+      - name: Build coverage summary
+        id: coverage
+        run: |
+          total=$(go tool cover -func=coverage.out | awk '/^total:/ {print $3}')
+          echo "total=${total}" >> "$GITHUB_OUTPUT"
+
+          {
+            echo "# Unit Test Coverage"
+            echo
+            echo "- Total coverage: ${total}"
+            echo "- Workflow run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          } > coverage-summary.md
+
+      - name: Upload coverage artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            coverage.out
+            coverage-summary.md
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Post coverage comment to PR
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const body = [
+              "## Unit Test Coverage",
+              "",
+              `- Total coverage: ${{ steps.coverage.outputs.total }}`,
+              `- Workflow run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}`,
+              "",
+              `Generated at: ${new Date().toISOString()}`,
+            ].join("\n");
+
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body,
+            });
+
+  integration-test:
+    name: Integration testing
+    runs-on: ubuntu-latest
+    needs: [unit-test]
+    env:
+      SPICEDB_ENDPOINT: 127.0.0.1:50051
+      SPICEDB_TOKEN: ci-integration-test-key
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: ${{ env.GO_VERSION }}
+
+      - name: Download dependencies
+        run: go mod download
+
+      - name: Install code generator
+        run: go install ./cmd/authzed-codegen
+
+      - name: Install grpc_health_probe
+        run: bash scripts/install_grpc_health_probe.sh
+
+      - name: Start SpiceDB
+        run: bash scripts/start_spicedb.sh
+
+      - name: Build and run example 1 against SpiceDB
+        run: |
+          cd test_data/example_1
+          go generate
+          go build -o main_app main.go
+          ./main_app
+
+      - name: Reset SpiceDB
+        run: bash scripts/start_spicedb.sh
+
+      - name: Build and run example 2 against SpiceDB
+        run: |
+          cd test_data/example_2
+          go generate
+          go build -o main_app main.go
+          ./main_app
+
+      - name: Reset SpiceDB
+        run: bash scripts/start_spicedb.sh
+
+      - name: Build and run example 3 against SpiceDB
+        run: |
+          cd test_data/example_3
+          go generate
+          go build -o main_app main.go
+          ./main_app
+
+      - name: Reset SpiceDB
+        run: bash scripts/start_spicedb.sh
+
+      - name: Build and run example 4 against SpiceDB
+        run: |
+          cd test_data/example_4
+          go generate
+          go build -o main_app main.go
+          ./main_app
+
+      - name: Reset SpiceDB
+        run: bash scripts/start_spicedb.sh
+
+      - name: Build and run example 5 against SpiceDB
+        run: |
+          cd test_data/example_5
+          go generate
+          go build -o main_app main.go
+          ./main_app
+
+      - name: Reset SpiceDB
+        run: bash scripts/start_spicedb.sh
+
+      - name: Build and run example 6 against SpiceDB
+        run: |
+          cd test_data/example_6
+          go generate
+          go build -o main_app main.go
+          ./main_app

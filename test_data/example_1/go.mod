@@ -1,4 +1,4 @@
-module github.com/oitnes/authzed-codegen
+module example_1
 
 go 1.24.0
 
@@ -7,7 +7,7 @@ toolchain go1.24.5
 require (
 	github.com/authzed/authzed-go v1.8.0
 	github.com/authzed/grpcutil v0.0.0-20250221190651-1985b19b35b8
-	github.com/dave/jennifer v1.7.1
+	github.com/oitnes/authzed-codegen v0.0.0
 	google.golang.org/grpc v1.78.0
 )
 
@@ -32,3 +32,6 @@ require (
 	google.golang.org/protobuf v1.36.11 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
+
+// to test current code version
+replace github.com/oitnes/authzed-codegen => ../../

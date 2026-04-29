@@ -1,0 +1,93 @@
+// created using guideline https://authzed.com/docs/spicedb/modeling/developing-a-schema
+
+// some user definition (any visitor of application)
+definition user {}
+
+// anonymoususer represents an unauthenticated user
+definition anonymoususer {}
+
+// global platform definition
+definition platform {
+	// any visitors that is NOT logged in to platform
+	relation visitor: anonymoususer:*
+
+	// user that registered at platform and logged in
+	relation registered_user: user
+
+	// some guy that able to check platform guidelines following
+	relation administrator: user
+
+	// to manage any part of the platform
+	permission super_admin = administrator
+
+	// to create new private or public forum
+	permission create_forum = registered_user
+
+	// can request subscription to some forum (any request to public should be automactically accepted)
+	permission subscribe_forums = registered_user
+
+	// can browse for some existing forums or view platform common posts
+	permission view = visitor + registered_user + administrator
+}
+
+// the forum may be public or private
+definition forum {
+	// forum can only be at only one (root) platform at the same time
+	relation global: platform
+
+	// registered user of the global platform that currently is an owner of the forum (only one at the same time)
+	relation owner: user
+
+	// registered user of the global platform that currently is an admin of the forum
+	relation admin: user
+
+	// registered user of the global platform that currently is a member(subscriber) of the forum
+	relation member: user
+
+	// registered user of the global platform that requested the membership to the forum
+	relation applicant: user
+
+	// registered user of the global platform that was invited to the membership to the forum
+	relation invited_candidate: user
+
+	// registered user of the global platform that banned at the forum
+	relation banned: user
+
+	// can add and remove admins from the list of admins
+	permission edit_admin_list = owner
+
+	// can edit some not permanent parameters of forum
+	permission edit = owner + global->super_admin + (admin - banned)
+
+	// can delete the forum
+	permission delete = owner + global->super_admin
+
+	// can request applicaiton to the forum. at public forum applicaiton shuold be skiped and automatically set user at subscribed.
+	permission apply = ((global->subscribe_forums - member) - applicant + invited_candidate) - banned
+
+	// can create posts at the forum
+	permission make_post = owner + (admin + member - banned)
+
+	// can view forum info or posts
+	permission view = make_post + global->super_admin
+
+	// can view public-openned forum info or public-posts
+	permission public_view = view + global->view
+}
+
+definition post {
+	// forum can only be at only one forum and can't be moved to another at any time
+	relation location: forum
+
+	// author of the post
+	relation author: user
+
+	// can be edit only authors and not banned (if author was banned)
+	permission edit = author & location->make_post
+
+	// can be viewed by any member of forum
+	permission view = location->view
+
+	// can be deleted by post authors (if not banned) or by forum editors (for moderation)
+	permission delete = (author & location->make_post) + location->edit
+}
