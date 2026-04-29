@@ -1,6 +1,8 @@
 package codegen
 
 import (
+	"strings"
+
 	"github.com/dave/jennifer/jen"
 	"github.com/oitnes/authzed-codegen/internal/generator/ast"
 	"github.com/oitnes/authzed-codegen/internal/generator/naming"
@@ -10,9 +12,9 @@ import (
 func generateRelationMethods(f *jen.File, def *ast.Definition, withRepository bool) {
 	for _, rel := range def.Relations {
 		generateRelationObjectsStruct(f, def, rel)
-		generateCreateRelation(f, def, rel)
+		generateRelationMutation(f, def, rel, "Create")
 		generateReadRelation(f, def, rel, withRepository)
-		generateDeleteRelation(f, def, rel)
+		generateRelationMutation(f, def, rel, "Delete")
 	}
 }
 
@@ -34,13 +36,15 @@ func generateRelationObjectsStruct(f *jen.File, def *ast.Definition, rel *ast.Re
 	f.Line()
 }
 
-// generateCreateRelation generates the Create{Relation}Relations method.
-func generateCreateRelation(f *jen.File, def *ast.Definition, rel *ast.Relation) {
+// generateRelationMutation generates a Create or Delete {Relation}Relations method.
+// op must be "Create" or "Delete".
+func generateRelationMutation(f *jen.File, def *ast.Definition, rel *ast.Relation, op string) {
 	typeName := naming.TypeStructName(def.Name)
 	receiver := naming.ReceiverName(typeName)
-	methodName := "Create" + naming.ToPascalCase(rel.Name) + "Relations"
+	methodName := op + naming.ToPascalCase(rel.Name) + "Relations"
 	structName := naming.RelationObjectsStructName(def.Name, rel.Name)
 	relConst := naming.RelationConstName(def.Name, rel.Name)
+	engineMethod := op + "Relations"
 
 	var body []jen.Code
 	for _, st := range rel.SubjectTypes {
@@ -55,7 +59,7 @@ func generateCreateRelation(f *jen.File, def *ast.Definition, rel *ast.Relation)
 					jen.Id("ids").Index(jen.Id("i")).Op("=").Qual(authzPkg, "ID").Call(jen.Id("s").Dot("id")),
 				),
 				jen.If(
-					jen.Err().Op(":=").Id(receiver).Dot("engine").Dot("CreateRelations").Call(
+					jen.Err().Op(":=").Id(receiver).Dot("engine").Dot(engineMethod).Call(
 						jen.Id("ctx"),
 						jen.Id(receiver).Dot("resource").Call(),
 						jen.Id(relConst),
@@ -73,7 +77,7 @@ func generateCreateRelation(f *jen.File, def *ast.Definition, rel *ast.Relation)
 			body = append(body,
 				jen.If(jen.Id("subjects").Dot(wildcardField)).Block(
 					jen.If(
-						jen.Err().Op(":=").Id(receiver).Dot("engine").Dot("CreateRelations").Call(
+						jen.Err().Op(":=").Id(receiver).Dot("engine").Dot(engineMethod).Call(
 							jen.Id("ctx"),
 							jen.Id(receiver).Dot("resource").Call(),
 							jen.Id(relConst),
@@ -91,7 +95,7 @@ func generateCreateRelation(f *jen.File, def *ast.Definition, rel *ast.Relation)
 
 	body = append(body, jen.Return(jen.Nil()))
 
-	f.Commentf("%s creates %s relations for this %s.", methodName, rel.Name, def.Name)
+	f.Commentf("%s %ss %s relations for this %s.", methodName, strings.ToLower(op), rel.Name, def.Name)
 	f.Func().Params(jen.Id(receiver).Id(typeName)).Id(methodName).Params(
 		jen.Id("ctx").Qual("context", "Context"),
 		jen.Id("subjects").Id(structName),
@@ -116,17 +120,7 @@ func generateReadRelation(f *jen.File, def *ast.Definition, rel *ast.Relation, w
 		idsVar := "ids" + fieldName
 		wildcardField := fieldName + "Wildcard"
 
-		newSubjectCall := jen.Id("New"+fieldName).Call(
-			jen.String().Call(jen.Id("id")),
-			jen.Id(receiver).Dot("engine"),
-		)
-		if withRepository {
-			newSubjectCall = jen.Id("New"+fieldName).Call(
-				jen.String().Call(jen.Id("id")),
-				jen.Id(receiver).Dot("engine"),
-				jen.Id(receiver).Dot("repo"),
-			)
-		}
+		newSubjectCall := newEntityCall(fieldName, receiver, withRepository)
 
 		loopBody := []jen.Code{
 			jen.Id("result").Dot(fieldName).Op("=").Append(
@@ -170,67 +164,3 @@ func generateReadRelation(f *jen.File, def *ast.Definition, rel *ast.Relation, w
 	f.Line()
 }
 
-// generateDeleteRelation generates the Delete{Relation}Relations method.
-func generateDeleteRelation(f *jen.File, def *ast.Definition, rel *ast.Relation) {
-	typeName := naming.TypeStructName(def.Name)
-	receiver := naming.ReceiverName(typeName)
-	methodName := "Delete" + naming.ToPascalCase(rel.Name) + "Relations"
-	structName := naming.RelationObjectsStructName(def.Name, rel.Name)
-	relConst := naming.RelationConstName(def.Name, rel.Name)
-
-	var body []jen.Code
-	for _, st := range rel.SubjectTypes {
-		fieldName := naming.TypeStructName(st.TypeName)
-		typeConst := naming.TypeConstName(st.TypeName)
-		wildcardField := fieldName + "Wildcard"
-
-		body = append(body,
-			jen.If(jen.Len(jen.Id("subjects").Dot(fieldName)).Op(">").Lit(0)).Block(
-				jen.Id("ids").Op(":=").Make(jen.Index().Qual(authzPkg, "ID"), jen.Len(jen.Id("subjects").Dot(fieldName))),
-				jen.For(jen.Id("i").Op(",").Id("s").Op(":=").Range().Id("subjects").Dot(fieldName)).Block(
-					jen.Id("ids").Index(jen.Id("i")).Op("=").Qual(authzPkg, "ID").Call(jen.Id("s").Dot("id")),
-				),
-				jen.If(
-					jen.Err().Op(":=").Id(receiver).Dot("engine").Dot("DeleteRelations").Call(
-						jen.Id("ctx"),
-						jen.Id(receiver).Dot("resource").Call(),
-						jen.Id(relConst),
-						jen.Id(typeConst),
-						jen.Id("ids"),
-					),
-					jen.Err().Op("!=").Nil(),
-				).Block(
-					jen.Return(jen.Err()),
-				),
-			),
-		)
-
-		if st.IsWildcard {
-			body = append(body,
-				jen.If(jen.Id("subjects").Dot(wildcardField)).Block(
-					jen.If(
-						jen.Err().Op(":=").Id(receiver).Dot("engine").Dot("DeleteRelations").Call(
-							jen.Id("ctx"),
-							jen.Id(receiver).Dot("resource").Call(),
-							jen.Id(relConst),
-							jen.Id(typeConst),
-							jen.Index().Qual(authzPkg, "ID").Values(jen.Qual(authzPkg, "ID").Call(jen.Lit("*"))),
-						),
-						jen.Err().Op("!=").Nil(),
-					).Block(
-						jen.Return(jen.Err()),
-					),
-				),
-			)
-		}
-	}
-
-	body = append(body, jen.Return(jen.Nil()))
-
-	f.Commentf("%s deletes %s relations for this %s.", methodName, rel.Name, def.Name)
-	f.Func().Params(jen.Id(receiver).Id(typeName)).Id(methodName).Params(
-		jen.Id("ctx").Qual("context", "Context"),
-		jen.Id("subjects").Id(structName),
-	).Error().Block(body...)
-	f.Line()
-}

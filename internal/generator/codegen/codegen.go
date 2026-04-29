@@ -12,6 +12,18 @@ import (
 
 const authzPkg = "github.com/oitnes/authzed-codegen/pkg/authz"
 
+// newEntityCall builds a New<typeName>(id, <receiver>.engine[, <receiver>.repo]) jennifer expression.
+func newEntityCall(typeName, receiver string, withRepo bool) jen.Code {
+	args := []jen.Code{
+		jen.String().Call(jen.Id("id")),
+		jen.Id(receiver).Dot("engine"),
+	}
+	if withRepo {
+		args = append(args, jen.Id(receiver).Dot("repo"))
+	}
+	return jen.Id("New" + typeName).Call(args...)
+}
+
 // Options controls code generation behavior.
 type Options struct {
 	PackageName    string

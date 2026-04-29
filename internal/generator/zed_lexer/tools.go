@@ -16,7 +16,7 @@ func filterCaveats(inputTokens []Token) []Token {
 	return inputTokens
 }
 
-func haveIlligal(inputTokens []Token) (bool, Token) {
+func haveIllegal(inputTokens []Token) (bool, Token) {
 	for _, t := range inputTokens {
 		if t.Type == ILLEGAL {
 			return true, t

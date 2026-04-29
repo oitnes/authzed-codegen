@@ -157,17 +157,7 @@ func generateLookupMethods(f *jen.File, def *ast.Definition, perm *ast.Permissio
 			generatedLookups[lookupSubKey] = true
 
 			methodName := fmt.Sprintf("Lookup%ssWith%s", subjectTypeName, naming.ToPascalCase(perm.Name))
-			newSubjectCall := jen.Id("New"+subjectTypeName).Call(
-				jen.String().Call(jen.Id("id")),
-				jen.Id(receiver).Dot("engine"),
-			)
-			if withRepository {
-				newSubjectCall = jen.Id("New"+subjectTypeName).Call(
-					jen.String().Call(jen.Id("id")),
-					jen.Id(receiver).Dot("engine"),
-					jen.Id(receiver).Dot("repo"),
-				)
-			}
+			newSubjectCall := newEntityCall(subjectTypeName, receiver, withRepository)
 
 			f.Commentf("%s finds all %s subjects that have %s permission on this %s.", methodName, st, perm.Name, def.Name)
 			f.Func().Params(jen.Id(receiver).Id(typeName)).Id(methodName).Params(

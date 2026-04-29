@@ -20,12 +20,6 @@ type Resource struct {
 	ID   ID
 }
 
-// Subject identifies a subject with its type and IDs.
-type Subject struct {
-	Type Type
-	IDs  []ID
-}
-
 // PermissionCheck represents a single permission check in a bulk operation.
 type PermissionCheck struct {
 	Resource    Resource
@@ -78,22 +72,4 @@ type Repository interface {
 	Delete(ctx context.Context, entityType Type, id ID) error
 	Exists(ctx context.Context, entityType Type, id ID) (bool, error)
 	List(ctx context.Context, entityType Type, filters map[string]any) ([]ID, error)
-}
-
-// IDs converts a slice of string-like types to a slice of ID.
-func IDs[T ~string](ids []T) []ID {
-	result := make([]ID, len(ids))
-	for i, id := range ids {
-		result[i] = ID(id)
-	}
-	return result
-}
-
-// FromIDs converts a slice of ID to a slice of string-like types.
-func FromIDs[T ~string](ids []ID) []T {
-	result := make([]T, len(ids))
-	for i, id := range ids {
-		result[i] = T(id)
-	}
-	return result
 }

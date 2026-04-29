@@ -231,7 +231,7 @@ func TestHaveIllegal(t *testing.T) {
 			{DEFINITION, "definition", 1, 1},
 			{IDENTIFIER, "user", 1, 12},
 		}
-		have, _ := haveIlligal(tokens)
+		have, _ := haveIllegal(tokens)
 		if have {
 			t.Error("expected no illegal tokens")
 		}
@@ -242,7 +242,7 @@ func TestHaveIllegal(t *testing.T) {
 			{DEFINITION, "definition", 1, 1},
 			{ILLEGAL, "@", 1, 12},
 		}
-		have, tok := haveIlligal(tokens)
+		have, tok := haveIllegal(tokens)
 		if !have {
 			t.Error("expected illegal token to be found")
 		}
@@ -252,7 +252,7 @@ func TestHaveIllegal(t *testing.T) {
 	})
 
 	t.Run("empty tokens", func(t *testing.T) {
-		have, _ := haveIlligal(nil)
+		have, _ := haveIllegal(nil)
 		if have {
 			t.Error("expected no illegal tokens for nil input")
 		}

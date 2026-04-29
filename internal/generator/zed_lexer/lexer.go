@@ -59,7 +59,7 @@ func Lex(inputCode string) ([]Token, error) {
 	lexer := lexer{InputCode: inputCode}
 	lexTokens := lexer.Lex()
 
-	if have, t := haveIlligal(lexTokens); have {
+	if have, t := haveIllegal(lexTokens); have {
 		return lexTokens, fmt.Errorf("lexer found illigal tokens. line: %d, col: %d, literal: %s", t.Column, t.Line, t.Literal)
 	}
 
